@@ -35,8 +35,9 @@
 *  POSSIBILITY OF SUCH DAMAGE.
 *********************************************************************/
 
+#include <vector>
 #include "message_transport/common/subscriber_plugin.h"
-//#include <pluginlib/class_loader.h>
+#include <boost/shared_ptr.hpp>
 #include <boost/scoped_ptr.hpp>
 
 namespace message_transport {
@@ -55,7 +56,7 @@ namespace message_transport {
 				return !unsubscribed_;
 			}
 
-			virtual void reset(const TransportHints& transport_hints) = 0;
+			virtual void reset() = 0;
 			void shutdown() {
 				this->shutdownImpl();
 			}
@@ -63,9 +64,9 @@ namespace message_transport {
 			virtual boost::shared_ptr< SubscriberPluginGen > getSubscriber() = 0;
 
 			template <class M> 
-				boost::shared_ptr< SubscriberPlugin<M> > getTemplateSubscriber() {
-                    return boost::dynamic_pointer_cast< SubscriberPlugin<M> >(getSubscriber());
-				}
+            boost::shared_ptr< SubscriberPlugin<M> > getTemplateSubscriber() {
+                return boost::dynamic_pointer_cast< SubscriberPlugin<M> >(getSubscriber());
+            }
 
 
 			virtual std::vector<std::string> getDeclaredClasses() = 0;
@@ -75,7 +76,7 @@ namespace message_transport {
 	};
 
 	template <class M>
-		class  SubscriberImpl : public SubscriberImplGen
+    class  SubscriberImpl : public SubscriberImplGen
 	{
 		public:
 			SubscriberImpl(const std::string & packageName,const std::string & className)
@@ -94,13 +95,10 @@ namespace message_transport {
 				}
 			}
 
-			virtual void reset(const TransportHints& transport_hints) {
-				std::string lookup_name = SubscriberPluginGen::getLookupName(transport_hints.getTransport());
-#if ROS_VERSION_MINIMUM(1, 7, 0) // if current ros version is >= 1.7.0
-				subscriber_ = loader_.createInstance(lookup_name);
-#else
-				subscriber_.reset(loader_.createClassInstance(lookup_name));
-#endif
+			virtual void reset() {
+				std::string lookup_name = SubscriberPluginGen::getLookupName();
+                // @todo replace pluginlib with hardcoded instance creation
+				//subscriber_ = loader_.createInstance(lookup_name);
 			}
 
 			virtual boost::shared_ptr< SubscriberPluginGen > getSubscriber() {
@@ -108,12 +106,14 @@ namespace message_transport {
 			}
 
 			virtual std::vector<std::string> getDeclaredClasses() {
-				return loader_.getDeclaredClasses();
+                std::vector< std::string> result;
+                // @todo list available transports manually for now
+				//return loader_.getDeclaredClasses();
+                return result;
 			}
 
 		protected:
 
-			pluginlib::ClassLoader< SubscriberPlugin<M> > loader_;
             boost::shared_ptr< SubscriberPlugin<M> > subscriber_;
 	};
 };

@@ -35,9 +35,10 @@
 *  POSSIBILITY OF SUCH DAMAGE.
 *********************************************************************/
 
+#include <string>
+
 #include "message_transport/common/publisher.h"
 #include "message_transport/common/publisher_plugin.h"
-//#include <pluginlib/class_loader.h>
 #include <boost/ptr_container/ptr_vector.hpp>
 #include <boost/foreach.hpp>
 #include <boost/algorithm/string/erase.hpp>
@@ -76,23 +77,23 @@ namespace message_transport {
 			virtual void shutdownImpl() = 0;
 
 			template <class M>
-				void subscriberCB(const SingleSubscriberPublisher<M>& plugin_pub,
-						const typename SingleSubscriberPublisher<M>::StatusCB& user_cb)
-				{
-					SingleSubscriberPublisher<M> ssp(plugin_pub.getSubscriberName(), this->getTopic(),
-							boost::bind(&PublisherImplGen::getNumSubscribersBindable, this),
-							plugin_pub.publish_fn_);
-					user_cb(ssp);
-				}
+            void subscriberCB(const SingleSubscriberPublisher<M>& plugin_pub,
+                    const typename SingleSubscriberPublisher<M>::StatusCB& user_cb)
+            {
+                SingleSubscriberPublisher<M> ssp(plugin_pub.getSubscriberName(), this->getTopic(),
+                        boost::bind(&PublisherImplGen::getNumSubscribersBindable, this),
+                        plugin_pub.publish_fn_);
+                user_cb(ssp);
+            }
 
 			virtual std::vector<std::string> getDeclaredClasses() = 0;
 
 
 			template <class M>
-				void publish(const M& message) const;
+            void publish(const M& message) const;
 
 			template <class M>
-				void publish(const typename M::ConstPtr& message) const;
+            void publish(const typename M::ConstPtr& message) const;
 
 		protected :
 			std::string base_topic_;
@@ -141,11 +142,8 @@ namespace message_transport {
 			}
 
             boost::shared_ptr< PublisherPlugin<M> > addInstance(const std::string & name) {
-#if ROS_VERSION_MINIMUM(1, 7, 0) // if current ros version is >= 1.7.0
+                // @todo create transport manually
                 boost::shared_ptr< PublisherPlugin<M> > pub = loader_.createInstance(name);
-#else
-                boost::shared_ptr< PublisherPlugin<M> > pub(loader_.createClassInstance(name));
-#endif
 				publishers_.push_back(pub);
 				return pub;
 			}

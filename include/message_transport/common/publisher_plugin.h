@@ -23,8 +23,7 @@ namespace message_transport {
 			/**
 			 * \brief Advertise a topic, simple version.
 			 */
-			virtual void advertise(ros::NodeHandle & nh, const std::string& base_topic, uint32_t queue_size,
-					bool latch = true) = 0;
+			virtual void advertise(const std::string& base_topic, uint32_t queue_size, bool latch = true) = 0;
 
 			/**
 			 * \brief Returns the number of subscribers that are currently connected to
@@ -58,14 +57,13 @@ namespace message_transport {
 	 * \brief Base class for plugins to Publisher.
 	 */
 	template <class M>
-		class PublisherPlugin : public PublisherPluginGen
+	class PublisherPlugin : public PublisherPluginGen
 	{
 		public:
 			virtual ~PublisherPlugin() {}
 
-			virtual void advertise(ros::NodeHandle & nh, const std::string& base_topic, uint32_t queue_size,
-					bool latch = true) {
-				advertiseImpl(nh,base_topic, queue_size, 
+			virtual void advertise(const std::string& base_topic, uint32_t queue_size, bool latch = true) {
+				advertiseImpl(base_topic, queue_size,
 						typename message_transport::SingleSubscriberPublisher<M>::StatusCB(),
 						typename message_transport::SingleSubscriberPublisher<M>::StatusCB(), ros::VoidPtr(), latch);
 
