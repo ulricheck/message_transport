@@ -1,8 +1,8 @@
 #ifndef MESSAGE_TRANSPORT_PUBLISHER_PLUGIN_H
 #define MESSAGE_TRANSPORT_PUBLISHER_PLUGIN_H
 
-#include <ros/ros.h>
-#include "message_transport/single_subscriber_publisher.h"
+//#include <ros/ros.h>
+#include "message_transport/common/single_subscriber_publisher.h"
 
 namespace message_transport {
 

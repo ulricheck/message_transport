@@ -36,8 +36,8 @@
 #define MESSAGE_TRANSPORT_PUBLISHER_H
 
 //#include <ros/ros.h>
-#include "message_transport/publisher_impl.h"
-#include "message_transport/single_subscriber_publisher.h"
+#include "message_transport/common/publisher_impl.h"
+#include "message_transport/common/single_subscriber_publisher.h"
 
 namespace message_transport {
 

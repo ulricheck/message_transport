@@ -21,7 +21,7 @@ namespace sharedmem_transport {
 
             template <class M>
 			void publish_msg(const M& message) {
-				// @todo Find a way to compute the size of a serialized object (part of serialization framework)
+				// @todo Find a way to compute the (approximate) size of a serialized object (part of serialization framework)
 //                uint32_t serlen = ros::serialization::serializationLength(message);
 				uint32_t serlen = 0;
 

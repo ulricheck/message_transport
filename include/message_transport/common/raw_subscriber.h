@@ -1,7 +1,7 @@
 #ifndef MESSAGE_TRANSPORT_RAW_SUBSCRIBER_H
 #define MESSAGE_TRANSPORT_RAW_SUBSCRIBER_H
 
-#include "message_transport/simple_subscriber_plugin.h"
+#include "message_transport/common/simple_subscriber_plugin.h"
 
 namespace message_transport {
 

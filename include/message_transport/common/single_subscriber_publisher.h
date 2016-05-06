@@ -1,7 +1,7 @@
 #ifndef MESSAGE_TRANSPORT_SINGLE_SUBSCRIBER_PUBLISHER
 #define MESSAGE_TRANSPORT_SINGLE_SUBSCRIBER_PUBLISHER
 
-#include <ros/ros.h>
+//#include <ros/ros.h>
 #include <boost/noncopyable.hpp>
 #include <boost/function.hpp>
 

@@ -35,9 +35,9 @@
 *  POSSIBILITY OF SUCH DAMAGE.
 *********************************************************************/
 
-#include "message_transport/publisher.h"
-#include "message_transport/publisher_plugin.h"
-#include <pluginlib/class_loader.h>
+#include "message_transport/common/publisher.h"
+#include "message_transport/common/publisher_plugin.h"
+//#include <pluginlib/class_loader.h>
 #include <boost/ptr_container/ptr_vector.hpp>
 #include <boost/foreach.hpp>
 #include <boost/algorithm/string/erase.hpp>

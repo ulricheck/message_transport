@@ -35,8 +35,8 @@
 *  POSSIBILITY OF SUCH DAMAGE.
 *********************************************************************/
 
-#include "message_transport/subscriber_plugin.h"
-#include <pluginlib/class_loader.h>
+#include "message_transport/common/subscriber_plugin.h"
+//#include <pluginlib/class_loader.h>
 #include <boost/scoped_ptr.hpp>
 
 namespace message_transport {

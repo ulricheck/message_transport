@@ -1,7 +1,7 @@
 #ifndef MESSAGE_TRANSPORT_SIMPLE_PUBLISHER_PLUGIN_H
 #define MESSAGE_TRANSPORT_SIMPLE_PUBLISHER_PLUGIN_H
 
-#include "message_transport/publisher_plugin.h"
+#include "message_transport/common/publisher_plugin.h"
 #include <boost/scoped_ptr.hpp>
 
 namespace message_transport {

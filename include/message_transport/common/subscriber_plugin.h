@@ -1,10 +1,9 @@
 #ifndef MESSAGE_TRANSPORT_SUBSCRIBER_PLUGIN_H
 #define MESSAGE_TRANSPORT_SUBSCRIBER_PLUGIN_H
 
-#include <ros/ros.h>
+//#include <ros/ros.h>
 #include <boost/function.hpp>
 #include <boost/noncopyable.hpp>
-#include "message_transport/transport_hints.h"
 
 namespace message_transport {
 

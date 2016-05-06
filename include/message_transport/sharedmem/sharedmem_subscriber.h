@@ -5,9 +5,8 @@
 #include <boost/thread.hpp>
 #include <boost/interprocess/managed_shared_memory.hpp>
 
-#include <message_transport/simple_subscriber_plugin.h>
-#include <sharedmem_transport/SharedMemoryBlock.h>
-#include <sharedmem_transport/SharedMemHeader.h>
+#include <message_transport/common/simple_subscriber_plugin.h>
+#include <message_transport/sharedmem/SharedMemoryBlock.h>
 
 namespace sharedmem_transport {
 

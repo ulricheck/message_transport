@@ -1,7 +1,7 @@
 #ifndef MESSAGE_TRANSPORT_SIMPLE_SUBSCRIBER_PLUGIN_H
 #define MESSAGE_TRANSPORT_SIMPLE_SUBSCRIBER_PLUGIN_H
 
-#include "message_transport/subscriber_plugin.h"
+#include "message_transport/common/subscriber_plugin.h"
 #include <boost/scoped_ptr.hpp>
 
 namespace message_transport {

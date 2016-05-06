@@ -35,9 +35,9 @@
 #ifndef MESSAGE_TRANSPORT_SUBSCRIBER_H
 #define MESSAGE_TRANSPORT_SUBSCRIBER_H
 
-#include <ros/ros.h>
-#include "message_transport/transport_hints.h"
-#include "message_transport/subscriber_impl.h"
+//#include <ros/ros.h>
+#include "message_transport/common/transport_hints.h"
+#include "message_transport/common/subscriber_impl.h"
 
 namespace message_transport {
 

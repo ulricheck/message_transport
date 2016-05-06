@@ -1,7 +1,7 @@
 #ifndef MESSAGE_TRANSPORT_RAW_PUBLISHER_H
 #define MESSAGE_TRANSPORT_RAW_PUBLISHER_H
 
-#include "message_transport/simple_publisher_plugin.h"
+#include "message_transport/common/simple_publisher_plugin.h"
 
 namespace message_transport {
 
