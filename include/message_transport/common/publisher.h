@@ -5,8 +5,10 @@
 
 #include <boost/bind.hpp>
 #include <boost/shared_ptr.hpp>
+#include <boost/property_tree/ptree.hpp>
 
 namespace message_transport {
+namespace pt = boost::property_tree;
 
 	/**
 	 * \brief Manages advertisements of multiple transport options on an Message topic.
@@ -28,7 +30,7 @@ namespace message_transport {
 	class Publisher
 	{
 		public:
-//			Publisher() {}
+			Publisher(const boost::shared_ptr< pt::ptree >& config) : config_(config) {}
 			Publisher();
 
 			/*!
@@ -110,6 +112,7 @@ namespace message_transport {
 			typedef boost::shared_ptr<PublisherImplGen> ImplPtr;
 
 			ImplPtr impl_;
+			boost::shared_ptr< pt::ptree > config_;
 
 	};
 

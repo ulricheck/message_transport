@@ -6,13 +6,15 @@
 #include "message_transport/common/subscriber_plugin.h"
 #include <boost/shared_ptr.hpp>
 #include <boost/scoped_ptr.hpp>
+#include <boost/property_tree/ptree.hpp>
 
 namespace message_transport {
+namespace pt = boost::property_tree;
 
 	class  SubscriberImplGen
 	{
 		public :
-			SubscriberImplGen() : unsubscribed_(false) { }
+			SubscriberImplGen(const boost::shared_ptr< pt::ptree >& config) : unsubscribed_(false), config_(config)  { }
 
 			~SubscriberImplGen()
 			{
@@ -40,13 +42,14 @@ namespace message_transport {
 		protected :
 
 			bool unsubscribed_;
+			boost::shared_ptr< pt::ptree > config_;
 	};
 
 	template <class M>
     class  SubscriberImpl : public SubscriberImplGen
 	{
 		public:
-			SubscriberImpl() { }
+			SubscriberImpl(const boost::shared_ptr< pt::ptree >& config) : SubscriberImplGen(config) { }
 
 			~SubscriberImpl() {
 				shutdownImpl();

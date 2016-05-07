@@ -1,7 +1,7 @@
 
 
 #include <boost/interprocess/managed_shared_memory.hpp>
-#include <cstdlib> 
+#include <cstdlib>
 #include <cstddef>
 #include <cassert>
 #include <utility>
@@ -9,12 +9,14 @@
 #include "message_transport/sharedmem/SharedMemoryBlock.h"
 #include "message_transport/sharedmem/sharedmem_publisher.h"
 
-using namespace boost::interprocess;
 
+using namespace boost::interprocess;
 
 namespace sharedmem_transport {
 
-	SharedmemPublisherImpl::SharedmemPublisherImpl()
+
+	SharedmemPublisherImpl::SharedmemPublisherImpl(const boost::shared_ptr< pt::ptree >& config)
+            : config_(config)
 	{
 		segment_ = NULL;
 		clientRegistered = false;
@@ -38,8 +40,8 @@ namespace sharedmem_transport {
 
             // @todo Publisher should advertise topic availability
 
-            // @todo Publisher needs configuration of shm-segment name
-            std::string segment_name = MSGTSharedMemoryDefaultBlock;
+            std::string segment_name = config_->get("sharedmem.segment_name", MSGTSharedMemoryDefaultBlock);
+
             //nh_.param<std::string>("/sharedmem_manager/segment_name",segment_name,MSGTSharedMemoryDefaultBlock);
             //LOG_INFO("Got segment name: %s", segment_name.c_str());
             try {

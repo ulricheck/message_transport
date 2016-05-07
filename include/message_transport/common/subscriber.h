@@ -3,8 +3,10 @@
 #define MESSAGE_TRANSPORT_SUBSCRIBER_H
 
 #include "message_transport/common/subscriber_impl.h"
+#include <boost/property_tree/ptree.hpp>
 
 namespace message_transport {
+namespace pt = boost::property_tree;
 
 	/**
 	 * \brief Manages a subscription callback on a specific topic that can be interpreted
@@ -25,6 +27,7 @@ namespace message_transport {
 	{
 		public:
 			// need to pass topic here ??
+			Subscriber(const boost::shared_ptr< pt::ptree >& config) : config_(config) {}
 			Subscriber();
 
 			std::string getTopic() const;
@@ -49,7 +52,7 @@ namespace message_transport {
 					const boost::function<void(const typename M::ConstPtr&)>& callback)
 			{
 				// Tell plugin to subscribe.
-				impl_.reset(new SubscriberImpl<M>());
+				impl_.reset(new SubscriberImpl<M>(config_));
 				// Load the plugin for the chosen transport.
 				impl_.get()->reset(transport_name);
 
@@ -64,6 +67,7 @@ namespace message_transport {
 			typedef boost::shared_ptr<SubscriberImplGen> ImplPtr;
 
 			ImplPtr impl_;
+			boost::shared_ptr< pt::ptree > config_;
 
 	};
 

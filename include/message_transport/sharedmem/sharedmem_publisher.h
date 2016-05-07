@@ -6,13 +6,16 @@
 #include "message_transport/sharedmem/SharedMemoryBlock.h"
 #include "message_transport/logging.h"
 
+#include <boost/property_tree/ptree.hpp>
+#include <boost/shared_ptr.hpp>
 
 namespace sharedmem_transport {
+namespace pt = boost::property_tree;
 
 	class SharedmemPublisherImpl 
 	{
 		public:
-			SharedmemPublisherImpl();
+			SharedmemPublisherImpl(const boost::shared_ptr< pt::ptree >& config);
 			virtual ~SharedmemPublisherImpl();
 
 			uint32_t initialise(const std::string & topic);
@@ -40,6 +43,8 @@ namespace sharedmem_transport {
 			// mark them mutable and publish stays "const"
             shm_handle shm_handle_;
 
+            boost::shared_ptr< pt::ptree > config_;
+
 	};
 
 	template <class Base>
@@ -47,9 +52,11 @@ namespace sharedmem_transport {
 		public message_transport::PublisherPlugin<Base>
 	{
 		public:
-			SharedmemPublisher() : 
-                message_transport::PublisherPlugin<Base>(),
+			SharedmemPublisher(const boost::shared_ptr< pt::ptree >& config) :
+                message_transport::PublisherPlugin<Base>(config),
+                impl(config),
                 first_run_(true) {}
+
 			virtual ~SharedmemPublisher() {}
 
 			virtual std::string getTransportName() const

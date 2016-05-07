@@ -4,6 +4,7 @@
 #include <boost/bind.hpp>
 #include <boost/thread.hpp>
 #include <boost/interprocess/managed_shared_memory.hpp>
+#include <boost/property_tree/ptree.hpp>
 
 #include <message_transport/common/subscriber_plugin.h>
 #include <message_transport/sharedmem/SharedMemoryBlock.h>
@@ -11,12 +12,14 @@
 
 
 namespace sharedmem_transport {
+namespace pt = boost::property_tree;
 
 	template <class Base>
 	class SharedmemSubscriber : public message_transport::SubscriberPlugin<Base>
 	{
 		public:
-			SharedmemSubscriber() {
+			SharedmemSubscriber(const boost::shared_ptr< pt::ptree >& config)
+                    : message_transport::SubscriberPlugin<Base>(config) {
 				segment_ = NULL;
                 blockmgr_ = NULL;
                 rec_thread_ = NULL;
@@ -57,11 +60,13 @@ namespace sharedmem_transport {
 
 			virtual void startReceiving(const typename message_transport::SubscriberPlugin<Base>::Callback& user_cb)
 			{
+                std::string segment_name = message_transport::SubscriberPlugin<Base>::config_->get("sharedmem.segment_name", MSGTSharedMemoryDefaultBlock);
+
 				user_cb_ = &user_cb;
                 LOG_DEBUG("received latched message");
                 if (!segment_) {
                     try {
-                    segment_ = new boost::interprocess::managed_shared_memory(boost::interprocess::open_only,MSGTSharedMemoryDefaultBlock);
+                    segment_ = new boost::interprocess::managed_shared_memory(boost::interprocess::open_only, segment_name.c_str());
                     LOG_DEBUG("Connected to segment");
                     } catch (boost::interprocess::bad_alloc e) {
                         segment_ = NULL;

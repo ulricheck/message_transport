@@ -10,14 +10,16 @@
 #include <boost/bind.hpp>
 #include <boost/foreach.hpp>
 #include <boost/algorithm/string/erase.hpp>
+#include <boost/property_tree/ptree.hpp>
 
 namespace message_transport {
+namespace pt = boost::property_tree;
 
 	class PublisherImplGen
 	{
 		public:
-			PublisherImplGen(const std::string & topic) : 
-				base_topic_(topic), unsubscribed_(false) { }
+			PublisherImplGen(const boost::shared_ptr< pt::ptree >& config, const std::string & topic) :
+				config_(config), base_topic_(topic), unsubscribed_(false) { }
 
 			virtual ~PublisherImplGen()
 			{
@@ -56,13 +58,15 @@ namespace message_transport {
 		protected :
 			std::string base_topic_;
             bool unsubscribed_;
+            boost::shared_ptr< pt::ptree > config_;
 	};
 
 	template <class M>
 	class PublisherImpl : public PublisherImplGen
 	{
 		public :
-			PublisherImpl(const std::string & topic) : PublisherImplGen(topic)
+			PublisherImpl(const boost::shared_ptr< pt::ptree >& config, const std::string & topic)
+                    : PublisherImplGen(config, topic)
 		{
 		}
 

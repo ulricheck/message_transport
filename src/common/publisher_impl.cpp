@@ -20,7 +20,7 @@ boost::shared_ptr<PublisherPlugin<M> > PublisherImpl< M >::addInstance(const std
 {
     boost::shared_ptr<PublisherPlugin<M> > pub; // = loader_.createInstance(name);
     if (name.compare("sharedmem_pub") == 0) {
-        pub.reset(new sharedmem_transport::SharedmemPublisher<M>());
+        pub.reset(new sharedmem_transport::SharedmemPublisher<M>(config_));
     } else {
         throw std::runtime_error("Invalid transport");
     }

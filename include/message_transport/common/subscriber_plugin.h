@@ -6,8 +6,11 @@
 #include <boost/bind.hpp>
 #include <boost/function.hpp>
 #include <boost/noncopyable.hpp>
+#include <boost/shared_ptr.hpp>
+#include <boost/property_tree/ptree.hpp>
 
 namespace message_transport {
+namespace pt = boost::property_tree;
 
 	/**
 	 * \brief Base class for plugins to Subscriber.
@@ -15,6 +18,7 @@ namespace message_transport {
 	class SubscriberPluginGen : boost::noncopyable
 	{
 		public:
+            SubscriberPluginGen(const boost::shared_ptr< pt::ptree >& config) : config_(config) {}
 			virtual ~SubscriberPluginGen() {}
 
 			/**
@@ -48,6 +52,7 @@ namespace message_transport {
 			}
 
 		protected:
+            boost::shared_ptr< pt::ptree > config_;
 	};
 
 	template <class M>
@@ -56,7 +61,8 @@ namespace message_transport {
 		public:
 			typedef boost::function<void(const typename M::ConstPtr&)> Callback;
 
-        SubscriberPlugin()  : is_running(false), base_topic_("") {}
+        SubscriberPlugin(const boost::shared_ptr< pt::ptree >& config)  :
+                SubscriberPluginGen(config), is_running(false), base_topic_("") {}
 
         virtual ~SubscriberPlugin() {}
 
