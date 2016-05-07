@@ -7,7 +7,8 @@
 
 namespace message_transport {
 
-std::vector<std::string> SubscriberImpl::getDeclaredClasses()
+template< class M>
+std::vector<std::string> SubscriberImpl< M >::getDeclaredClasses()
 {
     std::vector<std::string> result;
     result.push_back("sharedmem_sub");
@@ -15,7 +16,7 @@ std::vector<std::string> SubscriberImpl::getDeclaredClasses()
 }
 
 template< class M>
-void SubscriberImpl::reset(const std::string& transport_name)
+void SubscriberImpl< M >::reset(const std::string& transport_name)
 {
     std::string lookup_name = SubscriberPluginGen::getLookupName(transport_name);
     if (lookup_name.compare("sharedmem_sub") == 0) {

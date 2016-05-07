@@ -25,7 +25,7 @@ namespace message_transport {
 	{
 		public:
 			// need to pass topic here ??
-			Subscriber() {}
+			Subscriber();
 
 			std::string getTopic() const;
 

@@ -1,7 +1,5 @@
 
 #include "message_transport/common/subscriber.h"
-#include "message_transport/common/subscriber_plugin.h"
-#include <boost/scoped_ptr.hpp>
 
 namespace message_transport {
 

@@ -7,7 +7,8 @@
 
 namespace message_transport {
 
-std::vector<std::string> PublisherImpl::getDeclaredClasses()
+template< class M>
+std::vector<std::string> PublisherImpl< M >::getDeclaredClasses()
 {
     std::vector<std::string> result;
     result.push_back("sharedmem_pub");
@@ -15,7 +16,7 @@ std::vector<std::string> PublisherImpl::getDeclaredClasses()
 }
 
 template <class M>
-boost::shared_ptr<PublisherPlugin<M> > PublisherImpl::addInstance(const std::string& name)
+boost::shared_ptr<PublisherPlugin<M> > PublisherImpl< M >::addInstance(const std::string& name)
 {
     boost::shared_ptr<PublisherPlugin<M> > pub; // = loader_.createInstance(name);
     if (name.compare("sharedmem_pub") == 0) {

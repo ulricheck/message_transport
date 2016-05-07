@@ -4,9 +4,9 @@
 #include <string>
 #include <vector>
 
-#include "message_transport/common/publisher.h"
 #include "message_transport/common/publisher_plugin.h"
 #include <boost/ptr_container/ptr_vector.hpp>
+#include <boost/shared_ptr.hpp>
 #include <boost/bind.hpp>
 #include <boost/foreach.hpp>
 #include <boost/algorithm/string/erase.hpp>

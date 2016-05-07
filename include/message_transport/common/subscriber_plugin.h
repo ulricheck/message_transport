@@ -54,7 +54,9 @@ namespace message_transport {
 		public:
 			typedef boost::function<void(const typename M::ConstPtr&)> Callback;
 
-			virtual ~SubscriberPlugin() : is_running(false) {}
+        SubscriberPlugin()  : is_running(false), base_topic_("") {}
+
+        virtual ~SubscriberPlugin() {}
 
 			/**
 			 * \brief Subscribe to an image topic, version for arbitrary boost::function object.
@@ -116,7 +118,7 @@ namespace message_transport {
 					const Callback& callback) {
 
                 if (!is_running) {
-                    base_topic = base_topic;
+                    base_topic_ = base_topic;
                     is_running = true;
                     // @todo subscriber should advertise that it is listening ..
                     startReceiving(callback);
@@ -127,8 +129,8 @@ namespace message_transport {
                 }
 			}
 
-		bool is_running;
-        std::string base_topic;
+            bool is_running;
+            std::string base_topic_;
 	};
 
 } //namespace message_transport

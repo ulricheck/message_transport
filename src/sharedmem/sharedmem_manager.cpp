@@ -32,13 +32,13 @@ bool clear_memory()
     //LOG_INFO("Deleted all handles");
     return true;
 }
-
-bool get_blocks(std::vector<SharedMemBlock>& result)
-{
-    boost::lock_guard<boost::mutex> guard(main_mutex);//auto-lock unlock, even on exception
-    result = blockmgr->getBlockList();
-    return true;
-}
+//
+//bool get_blocks(std::vector<SharedMemBlock>& result)
+//{
+//    boost::lock_guard<boost::mutex> guard(main_mutex);//auto-lock unlock, even on exception
+//    result = blockmgr->getBlockList();
+//    return true;
+//}
 
 int main(int argc, char* argv[])
 {

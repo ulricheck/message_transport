@@ -6,8 +6,6 @@
 #include <cassert>
 #include <utility>
 
-#include <ros/ros.h>
-
 #include "message_transport/sharedmem/SharedMemoryBlock.h"
 #include "message_transport/sharedmem/sharedmem_publisher.h"
 

@@ -43,7 +43,7 @@ namespace sharedmem_transport {
 		protected:
             void receiveThread() {
                 //LOG_DEBUG("Receive thread running");
-                while (is_running) {
+                while (message_transport::SubscriberPlugin<Base>::is_running) {
                     //LOG_DEBUG("Waiting for data");
                     boost::shared_ptr<Base> message_ptr(new Base);
                     if (blockmgr_->wait_data(*segment_, shm_handle_, *message_ptr) && user_cb_) {
