@@ -7,6 +7,8 @@
 
 #include <message_transport/common/subscriber_plugin.h>
 #include <message_transport/sharedmem/SharedMemoryBlock.h>
+#include "message_transport/logging.h"
+
 
 namespace sharedmem_transport {
 
@@ -21,7 +23,7 @@ namespace sharedmem_transport {
 			}
 
 			virtual ~SharedmemSubscriber() {
-                //LOG_DEBUG("Shutting down SharedmemSubscriber");
+                LOG_DEBUG("Shutting down SharedmemSubscriber");
                 if (rec_thread_) {
                     // We probably need to do something to clean up the
                     // cancelled thread here
@@ -42,46 +44,46 @@ namespace sharedmem_transport {
 
 		protected:
             void receiveThread() {
-                //LOG_DEBUG("Receive thread running");
+                LOG_DEBUG("Receive thread running");
                 while (message_transport::SubscriberPlugin<Base>::is_running) {
-                    //LOG_DEBUG("Waiting for data");
+                    LOG_DEBUG("Waiting for data");
                     boost::shared_ptr<Base> message_ptr(new Base);
                     if (blockmgr_->wait_data(*segment_, shm_handle_, *message_ptr) && user_cb_) {
                         (*user_cb_)(message_ptr);
                     }
                 }
-                //LOG_DEBUG("Unregistering client");
+                LOG_DEBUG("Unregistering client");
             }
 
 			virtual void startReceiving(const typename message_transport::SubscriberPlugin<Base>::Callback& user_cb)
 			{
 				user_cb_ = &user_cb;
-                //LOG_DEBUG("received latched message");
+                LOG_DEBUG("received latched message");
                 if (!segment_) {
                     try {
                     segment_ = new boost::interprocess::managed_shared_memory(boost::interprocess::open_only,MSGTSharedMemoryDefaultBlock);
-                    //LOG_DEBUG("Connected to segment");
+                    LOG_DEBUG("Connected to segment");
                     } catch (boost::interprocess::bad_alloc e) {
                         segment_ = NULL;
-                        //LOG_ERROR("Failed to connect to shared memory segment");
+                        LOG_ERROR("Failed to connect to shared memory segment");
                         return;
                     }
                     blockmgr_ = (segment_->find<SharedMemoryBlock>("Manager")).first;
                     if (!blockmgr_) {
                         delete segment_;
                         segment_ = NULL;
-                        //LOG_ERROR("Cannot find Manager block in shared memory segment");
+                        LOG_ERROR("Cannot find Manager block in shared memory segment");
                         return;
                     }
-                    //LOG_DEBUG("Got block mgr %p",blockmgr_);
+                    LOG_DEBUG("Got block mgr " << blockmgr_);
                     shm_handle_ = blockmgr_->findHandle(*segment_,this->getTopic().c_str());
                     if (shm_handle_.is_valid()) {
-                        //LOG_DEBUG("Got shm handle %p",shm_handle_.ptr);
+                        LOG_DEBUG("Got shm handle " << shm_handle_.ptr);
                         rec_thread_ = new  boost::thread(&SharedmemSubscriber::receiveThread,this);
                     } else {
                         delete segment_;
                         segment_ = NULL;
-                        //LOG_ERROR("Cannot find memory block for %s", this->getTopic().c_str());
+                        LOG_ERROR("Cannot find memory block for " << this->getTopic().c_str());
                     }
                 }
 			}

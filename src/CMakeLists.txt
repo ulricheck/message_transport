@@ -1,4 +1,11 @@
 
+set (MSGT_HEADERS
+        ${CMAKE_SOURCE_DIR}/include/message_transport/message_transport_macros.h
+        ${CMAKE_SOURCE_DIR}/include/message_transport/message_traits.h
+        ${CMAKE_SOURCE_DIR}/include/message_transport/message_transport_types.h
+        ${CMAKE_SOURCE_DIR}/include/message_transport/exceptions.h
+        )
+
 set(MSGT_COMMON_HEADERS
         ${CMAKE_SOURCE_DIR}/include/message_transport/common/publisher.h
         ${CMAKE_SOURCE_DIR}/include/message_transport/common/publisher_impl.h
@@ -6,15 +13,15 @@ set(MSGT_COMMON_HEADERS
         ${CMAKE_SOURCE_DIR}/include/message_transport/common/subscriber.h
         ${CMAKE_SOURCE_DIR}/include/message_transport/common/subscriber_impl.h
         ${CMAKE_SOURCE_DIR}/include/message_transport/common/subscriber_plugin.h
-        ${CMAKE_SOURCE_DIR}/include/message_transport/serialization/message_schema.h
         ${CMAKE_SOURCE_DIR}/include/message_transport/serialization/serialization.h
         )
 
 set(MSGT_COMMON_SOURCES
-        ${CMAKE_SOURCE_DIR}/src/common/publisher.cpp
-        ${CMAKE_SOURCE_DIR}/src/common/publisher_impl.cpp
-        ${CMAKE_SOURCE_DIR}/src/common/subscriber.cpp
-        ${CMAKE_SOURCE_DIR}/src/common/subscriber_impl.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/common/publisher.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/common/publisher_impl.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/common/subscriber.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/common/subscriber_impl.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/serialization/serialization.cpp
         )
 
 set(MSGT_SHAREDMEM_HEADERS
@@ -25,20 +32,24 @@ set(MSGT_SHAREDMEM_HEADERS
         )
 
 set(MSGT_SHAREDMEM_SOURCES
-        ${CMAKE_SOURCE_DIR}/src/sharedmem/sharedmem_publisher.cpp
-        ${CMAKE_SOURCE_DIR}/src/sharedmem/SharedMemoryBlock.cpp
-        ${CMAKE_SOURCE_DIR}/src/sharedmem/SharedMemoryBlockDescriptor.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/sharedmem/sharedmem_publisher.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/sharedmem/SharedMemoryBlock.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/sharedmem/SharedMemoryBlockDescriptor.cpp
         )
 
 set(MSGT_MANAGER_SOURCES
-        ${CMAKE_SOURCE_DIR}/src/sharedmem/sharedmem_manager.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/sharedmem/sharedmem_manager.cpp
         )
 
-add_library(msgt_common SHARED ${MSGT_COMMON_SOURCES} ${MSGT_COMMON_HEADERS} ${SCHEMA_HEADERS})
-target_link_libraries(msgt_common ${requiredLibs})
+message(STATUS ${SCHEMA_HEADERS})
 
-add_library(msgt_sharedmem SHARED ${MSGT_SHAREDMEM_SOURCES} ${MSGT_SHAREDMEM_HEADERS})
-target_link_libraries(msgt_sharedmem msgt_common ${requiredLibs})
+# maybe add static version later ..
+add_definitions(-DMSGT_BUILD_SHARED_LIBS)
+
+add_library(msgt SHARED ${MSGT_HEADERS} ${MSGT_COMMON_SOURCES} ${MSGT_COMMON_HEADERS} ${MSGT_SHAREDMEM_SOURCES} ${MSGT_SHAREDMEM_HEADERS})
+add_dependencies(msgt message_schema_headers)
+target_compile_definitions(msgt PUBLIC -DMSGT_EXPORT)
+target_link_libraries(msgt ${requiredLibs})
 
 add_executable(msgt_manager ${MSGT_MANAGER_SOURCES})
-target_link_libraries(msgt_manager msgt_sharedmem msgt_common ${requiredLibs})
+target_link_libraries(msgt_manager msgt ${requiredLibs})

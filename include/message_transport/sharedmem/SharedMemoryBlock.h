@@ -9,6 +9,9 @@
 #include <boost/interprocess/sync/scoped_lock.hpp>
 #include "message_transport/sharedmem/SharedMemoryBlockDescriptor.h"
 #include "message_transport/sharedmem/SharedMemoryBlock.h"
+#include "message_transport/serialization/serialization.h"
+#include "message_transport/logging.h"
+
 
 namespace sharedmem_transport {
 
@@ -55,7 +58,7 @@ namespace sharedmem_transport {
             bool wait_data(boost::interprocess::managed_shared_memory & segment,
                     shm_handle & src, Base & msg) {
                 {
-                    //LOG_DEBUG("Locking %d",src.handle);
+                    LOG_DEBUG("Locking " << src.handle);
                     boost::interprocess::scoped_lock<boost::interprocess::interprocess_mutex>
                         lock(descriptors[src.handle].mutex);
                     if (!descriptors[src.handle].wait_data_and_register_client(lock))  {
@@ -69,13 +72,12 @@ namespace sharedmem_transport {
                     }
                     */
                     register_global_client();
-                    //LOG_DEBUG("Unlocking %d",src.handle);
+                    LOG_DEBUG("Unlocking " << src.handle);
                 }
-                // @todo Implement serialization for Message Types
-//                deserialize<Base>(segment,src,msg);
+                deserialize<Base>(segment,src,msg);
 
                 unregister_global_client();
-                //LOG_DEBUG("Unregistering %d",src.handle);
+                LOG_DEBUG("Unregistering " << src.handle);
                 descriptors[src.handle].unregister_client();
                 //if (!ros::ok()) return false;
                 return true;
@@ -85,11 +87,11 @@ namespace sharedmem_transport {
             void serialize(boost::interprocess::managed_shared_memory & segment,
                     shm_handle & dest, const M & msg) {
                 boost::interprocess::scoped_lock<boost::interprocess::interprocess_mutex> lock(descriptors[dest.handle].mutex);
-                //LOG_DEBUG("serialize: locked %d, checking clients",dest.handle);
+                LOG_DEBUG("serialize: locked " << dest.handle << " checking clients");
                 descriptors[dest.handle].check_clients(lock);
-                //LOG_DEBUG("serialize: locked %d, clients checked",dest.handle);
+                LOG_DEBUG("serialize: locked  " << dest.handle << " clients checked");
                 register_global_client();
-                //LOG_DEBUG("serialize: global clients checked");
+                LOG_DEBUG("serialize: global clients checked");
 
                 assert(dest.handle < MSGTSharedMemoryNumBlock);
                 if (dest.resize_count != descriptors[dest.handle].resize_count_) {
@@ -97,16 +99,16 @@ namespace sharedmem_transport {
                     dest.resize_count = descriptors[dest.handle].resize_count_;
                     dest.ptr = ret.first;
                 }
-                //LOG_DEBUG("Serialising to %p, %d bytes",dest.ptr,descriptors[dest.handle].size_);
+                LOG_DEBUG("Serialising to " << dest.ptr << ", " << descriptors[dest.handle].size_ << " bytes");
 
                 // @todo Imlement deserialization for Message Types
 //                ros::serialization::OStream out(dest.ptr,descriptors[dest.handle].size_);
 //                ros::serialization::serialize(out, msg);
 
                 unregister_global_client();
-                //LOG_DEBUG("serialize: global clients released");
+                LOG_DEBUG("serialize: global clients released");
                 descriptors[dest.handle].signal_data();
-                //LOG_DEBUG("serialize: unlocking %d",dest.handle);
+                LOG_DEBUG("serialize: unlocking " << dest.handle);
             }
 
             //std::vector<SharedMemBlock> getBlockList() const ;
@@ -121,7 +123,7 @@ namespace sharedmem_transport {
                     src.resize_count = descriptors[src.handle].resize_count_;
                     src.ptr = ret.first;
                 }
-                //LOG_DEBUG("Deserialising from %p, %d bytes",src.ptr,descriptors[src.handle].size_);
+                LOG_DEBUG("Deserialising from " << src.ptr << ", " << descriptors[src.handle].size_ << " bytes");
 
                 // @todo Implement serialization for Message Types
 //                ros::serialization::IStream in(src.ptr,descriptors[src.handle].size_);
@@ -133,30 +135,30 @@ namespace sharedmem_transport {
 
             void check_global_clients(boost::interprocess::scoped_lock<boost::interprocess::interprocess_mutex> & lock) {
                 if (num_clients) {
-                    //LOG_DEBUG("Lock_global wait");
+                    LOG_DEBUG("Lock_global wait");
                     cond.wait(lock);
                 }
-                //LOG_DEBUG("Lock_global done");
+                LOG_DEBUG("Lock_global done");
             }
 
 
             void register_global_client() {
-                //LOG_DEBUG("register_global_client:: Locking global");
+                LOG_DEBUG("register_global_client:: Locking global");
                 boost::interprocess::scoped_lock<boost::interprocess::interprocess_mutex> lock(mutex); 
                 num_clients ++;
-                //LOG_DEBUG("Registered global client");
+                LOG_DEBUG("Registered global client");
             }
 
             void unregister_global_client() {
-                //LOG_DEBUG("unregister_global_client:: Locking global");
+                LOG_DEBUG("unregister_global_client:: Locking global");
                 boost::interprocess::scoped_lock<boost::interprocess::interprocess_mutex> lock(mutex); 
                 num_clients --;
                 assert(num_clients >= 0);
                 if (num_clients == 0) {
-                    //LOG_DEBUG("Global lock is free");
+                    LOG_DEBUG("Global lock is free");
                     cond.notify_all();
                 }
-                //LOG_DEBUG("Unregistered global client");
+                LOG_DEBUG("Unregistered global client");
             }
 
 

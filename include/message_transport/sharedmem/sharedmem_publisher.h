@@ -2,7 +2,10 @@
 #define SHAREDMEM_TRANSPORT_PUBLISHER_H
 
 #include "message_transport/common/publisher_plugin.h"
+#include "message_transport/serialization/serialization.h"
 #include "message_transport/sharedmem/SharedMemoryBlock.h"
+#include "message_transport/logging.h"
+
 
 namespace sharedmem_transport {
 
@@ -17,11 +20,10 @@ namespace sharedmem_transport {
             template <class M>
 			void publish_msg(const M& message) {
 				// @todo Find a way to compute the (approximate) size of a serialized object (part of serialization framework)
-//                uint32_t serlen = ros::serialization::serializationLength(message);
-				uint32_t serlen = 0;
+                uint32_t serlen = message_transport::serialization::serializationLength(message);
 
                 if (!shm_handle_.is_valid()) {
-                    //LOG_DEBUG("Ignoring publish request on an invalid handle");
+                    LOG_DEBUG("Ignoring publish request on an invalid handle");
                     return;
                 }
                 blockmgr_->reallocateBlock(*segment_,shm_handle_,serlen);
@@ -67,12 +69,12 @@ namespace sharedmem_transport {
 		protected:
 
 			virtual void publish(const Base& message) const {
-                //LOG_DEBUG("Publishing shm message");
+                LOG_DEBUG("Publishing shm message");
 				if (first_run_) {
-					//LOG_INFO("First publish run");
+					LOG_INFO("First publish run");
 					uint32_t handle = impl.initialise(this->getTopic());
 					// @todo should publish the availability of a message-topic on a shm-message-queue
-					//LOG_INFO("Publishing latched header");
+					LOG_INFO("Publishing latched header");
 					first_run_ = false;
 				}
                 impl.publish_msg(message);

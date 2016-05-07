@@ -56,5 +56,3 @@ if(FLATBUFFERS_FOUND)
 else()
     set(FLATBUFFERS_INCLUDE_DIR)
 endif()
-
-include("${FLATBUFFERS_CMAKE_DIR}/BuildFlatBuffers.cmake")

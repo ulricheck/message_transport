@@ -1,6 +1,8 @@
 #ifndef MESSAGE_TRANSPORT_SUBSCRIBER_PLUGIN_H
 #define MESSAGE_TRANSPORT_SUBSCRIBER_PLUGIN_H
 
+#include "message_transport/logging.h"
+
 #include <boost/bind.hpp>
 #include <boost/function.hpp>
 #include <boost/noncopyable.hpp>
@@ -124,7 +126,7 @@ namespace message_transport {
                     startReceiving(callback);
 
                 } else {
-                    //LOG_ERROR("Subscriber is already running.");
+                    LOG_ERROR("Subscriber is already running.");
                     throw std::runtime_error("Subscriber is already running.");
                 }
 			}

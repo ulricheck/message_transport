@@ -5,6 +5,10 @@
 #ifndef MESSAGE_TRANSPORT_SERIALIZATION_H
 #define MESSAGE_TRANSPORT_SERIALIZATION_H
 
+#include "message_transport/message_transport_macros.h"
+#include "message_transport/message_traits.h"
+#include "message_transport/exceptions.h"
+#include "message_transport/message_transport_types.h"
 
 #include <boost/array.hpp>
 #include <boost/call_traits.hpp>
@@ -14,6 +18,19 @@
 #include <boost/mpl/not.hpp>
 
 
+#include <string>
+#include <vector>
+#include <map>
+#include <set>
+#include <list>
+
+
+
+namespace message_transport {
+namespace serialization {
+
+namespace mpl = boost::mpl;
+namespace mt = message_traits;
 
 /**
  * \brief Templated serialization class.  Default implementation provides backwards compatibility with
@@ -23,8 +40,7 @@
  * to work with a type.
  */
 template<typename T>
-struct Serializer
-{
+struct Serializer {
   /**
    * \brief Write an object to the stream.  Normally the stream passed in here will be a ros::serialization::OStream
    */
@@ -51,7 +67,6 @@ struct Serializer
       return t.serializationLength();
   }
 };
-
 
 /**
  * \brief Serialize an object.  Stream here should normally be a ros::serialization::OStream
@@ -80,5 +95,569 @@ inline uint32_t serializationLength(const T& t)
     return Serializer<T>::serializedLength(t);
 }
 
+#define MSGT_CREATE_SIMPLE_SERIALIZER(Type) \
+  template<> struct Serializer<Type> \
+  { \
+    template<typename Stream> inline static void write(Stream& stream, const Type v) \
+    { \
+      *reinterpret_cast<Type*>(stream.advance(sizeof(v))) = v; \
+    } \
+    \
+    template<typename Stream> inline static void read(Stream& stream, Type& v) \
+    { \
+      v = *reinterpret_cast<Type*>(stream.advance(sizeof(v))); \
+    } \
+    \
+    inline static uint32_t serializedLength(const Type&) \
+    { \
+      return sizeof(Type); \
+    } \
+  };
 
+MSGT_CREATE_SIMPLE_SERIALIZER(uint8_t);
+MSGT_CREATE_SIMPLE_SERIALIZER(int8_t);
+MSGT_CREATE_SIMPLE_SERIALIZER(uint16_t);
+MSGT_CREATE_SIMPLE_SERIALIZER(int16_t);
+MSGT_CREATE_SIMPLE_SERIALIZER(uint32_t);
+MSGT_CREATE_SIMPLE_SERIALIZER(int32_t);
+MSGT_CREATE_SIMPLE_SERIALIZER(uint64_t);
+MSGT_CREATE_SIMPLE_SERIALIZER(int64_t);
+MSGT_CREATE_SIMPLE_SERIALIZER(float);
+MSGT_CREATE_SIMPLE_SERIALIZER(double);
+
+/**
+ * \brief Serializer specialized for bool (serialized as uint8)
+ */
+template<>
+struct Serializer<bool> {
+  template<typename Stream>
+  inline static void write(Stream& stream, const bool v)
+  {
+      uint8_t b = (uint8_t) v;
+      *reinterpret_cast<uint8_t*>(stream.advance(1)) = b;
+  }
+
+  template<typename Stream>
+  inline static void read(Stream& stream, bool& v)
+  {
+      uint8_t b;
+      b = *reinterpret_cast<uint8_t*>(stream.advance(1));
+      v = (bool) b;
+  }
+
+  inline static uint32_t serializedLength(bool)
+  {
+      return 1;
+  }
+};
+
+/**
+ * \brief  Serializer specialized for std::string
+ */
+template<class ContainerAllocator>
+struct Serializer<std::basic_string<char, std::char_traits<char>, ContainerAllocator> > {
+  typedef std::basic_string<char, std::char_traits<char>, ContainerAllocator> StringType;
+
+  template<typename Stream>
+  inline static void write(Stream& stream, const StringType& str)
+  {
+      size_t len = str.size();
+      stream.next((uint32_t) len);
+
+      if (len>0) {
+          memcpy(stream.advance((uint32_t) len), str.data(), len);
+      }
+  }
+
+  template<typename Stream>
+  inline static void read(Stream& stream, StringType& str)
+  {
+      uint32_t len;
+      stream.next(len);
+      if (len>0) {
+          str = StringType((char*) stream.advance(len), len);
+      }
+      else {
+          str.clear();
+      }
+  }
+
+  inline static uint32_t serializedLength(const StringType& str)
+  {
+      return 4+(uint32_t) str.size();
+  }
+};
+
+
+/**
+ * \brief Vector serializer.  Default implementation does nothing
+ */
+template<typename T, class ContainerAllocator, class Enabled = void>
+struct VectorSerializer { };
+
+/**
+ * \brief Vector serializer, specialized for non-fixed-size, non-simple types
+ */
+template<typename T, class ContainerAllocator>
+struct VectorSerializer<T, ContainerAllocator, typename boost::disable_if<mt::IsFixedSize<T> >::type > {
+typedef std::vector<T, typename ContainerAllocator::template rebind<T>::other> VecType;
+typedef typename VecType::iterator IteratorType;
+typedef typename VecType::const_iterator ConstIteratorType;
+
+template<typename Stream>
+inline static void write(Stream& stream, const VecType& v)
+{
+    stream.next((uint32_t) v.size());
+    ConstIteratorType it = v.begin();
+    ConstIteratorType end = v.end();
+    for (; it!=end; ++it) {
+        stream.next(*it);
+    }
+}
+
+template<typename Stream>
+inline static void read(Stream& stream, VecType& v)
+{
+    uint32_t len;
+    stream.next(len);
+    v.resize(len);
+    IteratorType it = v.begin();
+    IteratorType end = v.end();
+    for (; it!=end; ++it) {
+        stream.next(*it);
+    }
+}
+
+inline static uint32_t serializedLength(const VecType& v)
+{
+    uint32_t size = 4;
+    ConstIteratorType it = v.begin();
+    ConstIteratorType end = v.end();
+    for (; it!=end; ++it) {
+        size += serializationLength(*it);
+    }
+
+    return size;
+}
+};
+
+/**
+ * \brief Vector serializer, specialized for fixed-size simple types
+ */
+template<typename T, class ContainerAllocator>
+struct VectorSerializer<T, ContainerAllocator, typename boost::enable_if<mt::IsSimple<T> >::type > {
+typedef std::vector<T, typename ContainerAllocator::template rebind<T>::other> VecType;
+typedef typename VecType::iterator IteratorType;
+typedef typename VecType::const_iterator ConstIteratorType;
+
+template<typename Stream>
+inline static void write(Stream& stream, const VecType& v)
+{
+    uint32_t len = (uint32_t) v.size();
+    stream.next(len);
+    if (!v.empty()) {
+        const uint32_t data_len = len*(uint32_t) sizeof(T);
+        memcpy(stream.advance(data_len), &v.front(), data_len);
+    }
+}
+
+template<typename Stream>
+inline static void read(Stream& stream, VecType& v)
+{
+    uint32_t len;
+    stream.next(len);
+    v.resize(len);
+
+    if (len>0) {
+        const uint32_t data_len = (uint32_t) sizeof(T)*len;
+        memcpy(&v.front(), stream.advance(data_len), data_len);
+    }
+}
+
+inline static uint32_t serializedLength(const VecType& v)
+{
+    return 4+v.size()*(uint32_t) sizeof(T);
+}
+};
+
+/**
+ * \brief Vector serializer, specialized for fixed-size non-simple types
+ */
+template<typename T, class ContainerAllocator>
+struct VectorSerializer<T,
+                        ContainerAllocator,
+                        typename boost::enable_if<mpl::and_<mt::IsFixedSize<T>,
+                        mpl::not_<mt::IsSimple<T> > > >::type >
+{
+typedef std::vector<T, typename ContainerAllocator::template rebind<T>::other> VecType;
+typedef typename VecType::iterator IteratorType;
+typedef typename VecType::const_iterator ConstIteratorType;
+
+template<typename Stream>
+inline static void write(Stream& stream, const VecType& v)
+{
+    stream.next((uint32_t) v.size());
+    ConstIteratorType it = v.begin();
+    ConstIteratorType end = v.end();
+    for (; it!=end; ++it) {
+        stream.next(*it);
+    }
+}
+
+template<typename Stream>
+inline static void read(Stream& stream, VecType& v)
+{
+    uint32_t len;
+    stream.next(len);
+    v.resize(len);
+    IteratorType it = v.begin();
+    IteratorType end = v.end();
+    for (; it!=end; ++it) {
+        stream.next(*it);
+    }
+}
+
+inline static uint32_t serializedLength(const VecType& v)
+{
+    uint32_t size = 4;
+    if (!v.empty()) {
+        uint32_t len_each = serializationLength(v.front());
+        size += len_each*(uint32_t) v.size();
+    }
+
+    return size;
+}
+};
+
+/**
+ * \brief serialize version for std::vector
+ */
+template<typename T, class ContainerAllocator, typename Stream>
+inline void serialize(Stream& stream, const std::vector<T, ContainerAllocator>& t)
+{
+    VectorSerializer<T, ContainerAllocator>::write(stream, t);
+}
+
+/**
+ * \brief deserialize version for std::vector
+ */
+template<typename T, class ContainerAllocator, typename Stream>
+inline void deserialize(Stream& stream, std::vector<T, ContainerAllocator>& t)
+{
+    VectorSerializer<T, ContainerAllocator>::read(stream, t);
+}
+
+/**
+ * \brief serializationLength version for std::vector
+ */
+template<typename T, class ContainerAllocator>
+inline uint32_t serializationLength(const std::vector<T, ContainerAllocator>& t)
+{
+    return VectorSerializer<T, ContainerAllocator>::serializedLength(t);
+}
+
+/**
+ * \brief Array serializer, default implementation does nothing
+ */
+template<typename T, size_t N, class Enabled = void>
+struct ArraySerializer { };
+
+/**
+ * \brief Array serializer, specialized for non-fixed-size, non-simple types
+ */
+template<typename T, size_t N>
+struct ArraySerializer<T, N, typename boost::disable_if<mt::IsFixedSize<T> >::type>
+{
+typedef boost::array<T, N> ArrayType;
+typedef typename ArrayType::iterator IteratorType;
+typedef typename ArrayType::const_iterator ConstIteratorType;
+
+template<typename Stream>
+inline static void write(Stream& stream, const ArrayType& v)
+{
+    ConstIteratorType it = v.begin();
+    ConstIteratorType end = v.end();
+    for (; it!=end; ++it) {
+        stream.next(*it);
+    }
+}
+
+template<typename Stream>
+inline static void read(Stream& stream, ArrayType& v)
+{
+    IteratorType it = v.begin();
+    IteratorType end = v.end();
+    for (; it!=end; ++it) {
+        stream.next(*it);
+    }
+}
+
+inline static uint32_t serializedLength(const ArrayType& v)
+{
+    uint32_t size = 0;
+    ConstIteratorType it = v.begin();
+    ConstIteratorType end = v.end();
+    for (; it!=end; ++it) {
+        size += serializationLength(*it);
+    }
+
+    return size;
+}
+};
+
+/**
+ * \brief Array serializer, specialized for fixed-size, simple types
+ */
+template<typename T, size_t N>
+struct ArraySerializer<T, N, typename boost::enable_if<mt::IsSimple<T> >::type>
+{
+typedef boost::array<T, N> ArrayType;
+typedef typename ArrayType::iterator IteratorType;
+typedef typename ArrayType::const_iterator ConstIteratorType;
+
+template<typename Stream>
+inline static void write(Stream& stream, const ArrayType& v)
+{
+    const uint32_t data_len = N*sizeof(T);
+    memcpy(stream.advance(data_len), &v.front(), data_len);
+}
+
+template<typename Stream>
+inline static void read(Stream& stream, ArrayType& v)
+{
+    const uint32_t data_len = N*sizeof(T);
+    memcpy(&v.front(), stream.advance(data_len), data_len);
+}
+
+inline static uint32_t serializedLength(const ArrayType&)
+{
+    return N*sizeof(T);
+}
+};
+
+/**
+ * \brief Array serializer, specialized for fixed-size, non-simple types
+ */
+template<typename T, size_t N>
+struct ArraySerializer<T,
+                       N,
+                       typename boost::enable_if<mpl::and_<mt::IsFixedSize<T>,
+                       mpl::not_<mt::IsSimple<T> > > >::type>
+{
+typedef boost::array<T, N> ArrayType;
+typedef typename ArrayType::iterator IteratorType;
+typedef typename ArrayType::const_iterator ConstIteratorType;
+
+template<typename Stream>
+inline static void write(Stream& stream, const ArrayType& v)
+{
+    ConstIteratorType it = v.begin();
+    ConstIteratorType end = v.end();
+    for (; it!=end; ++it) {
+        stream.next(*it);
+    }
+}
+
+template<typename Stream>
+inline static void read(Stream& stream, ArrayType& v)
+{
+    IteratorType it = v.begin();
+    IteratorType end = v.end();
+    for (; it!=end; ++it) {
+        stream.next(*it);
+    }
+}
+
+inline static uint32_t serializedLength(const ArrayType& v)
+{
+    return serializationLength(v.front())*N;
+}
+};
+
+/**
+ * \brief serialize version for boost::array
+ */
+template<typename T, size_t N, typename Stream>
+inline void serialize(Stream& stream, const boost::array<T, N>& t)
+{
+    ArraySerializer<T, N>::write(stream, t);
+}
+
+/**
+ * \brief deserialize version for boost::array
+ */
+template<typename T, size_t N, typename Stream>
+inline void deserialize(Stream& stream, boost::array<T, N>& t)
+{
+    ArraySerializer<T, N>::read(stream, t);
+}
+
+/**
+ * \brief serializationLength version for boost::array
+ */
+template<typename T, size_t N>
+inline uint32_t serializationLength(const boost::array<T, N>& t)
+{
+    return ArraySerializer<T, N>::serializedLength(t);
+}
+
+
+/**
+ * \brief Enum
+ */
+namespace stream_types {
+enum StreamType {
+  Input,
+  Output,
+  Length
+};
+}
+typedef stream_types::StreamType StreamType;
+
+/**
+ * \brief Stream base-class, provides common functionality for IStream and OStream
+ */
+struct MSGT_API_DECL Stream {
+    /*
+     * \brief Returns a pointer to the current position of the stream
+     */
+    inline uint8_t* getData() { return data_; }
+    /**
+     * \brief Advances the stream, checking bounds, and returns a pointer to the position before it
+     * was advanced.
+     * \throws StreamOverrunException if len would take this stream past the end of its buffer
+     */
+    MSGT_FORCE_INLINE uint8_t
+    *
+    advance(uint32_t
+    len)
+    {
+        uint8_t*old_data = data_;
+        data_ += len;
+        if (data_>end_) {
+            // Throwing directly here causes a significant speed hit due to the extra code generated
+            // for the throw statement
+            throwStreamOverrun();
+        }
+        return old_data;
+    }
+
+    /**
+     * \brief Returns the amount of space left in the stream
+     */
+    inline uint32_t getLength() { return (uint32_t) (end_-data_); }
+
+protected:
+    Stream(uint8_t* _data, uint32_t _count)
+            :data_(_data), end_(_data+_count) { }
+
+private:
+    uint8_t* data_;
+    uint8_t* end_;
+};
+
+/**
+ * \brief Input stream
+ */
+struct MSGT_API_DECL IStream
+        : public Stream {
+  static const StreamType stream_type = stream_types::Input;
+
+  IStream(uint8_t* data, uint32_t count)
+          : Stream(data, count)
+  {
+  }
+
+/**
+ * \brief Deserialize an item from this input stream
+ */
+  template<typename T>
+  MSGT_FORCE_INLINE void next(T& t)
+  {
+      deserialize(*this, t);
+  }
+
+  template<typename T>
+  MSGT_FORCE_INLINE IStream
+  &
+  operator>>(T& t)
+  {
+      deserialize(*this, t);
+      return *this;
+  }
+};
+
+/**
+ * \brief Output stream
+ */
+struct MSGT_API_DECL OStream
+        : public Stream {
+  static const StreamType stream_type = stream_types::Output;
+
+  OStream(uint8_t* data, uint32_t count)
+          : Stream(data, count)
+  {
+  }
+
+/**
+ * \brief Serialize an item to this output stream
+ */
+  template<typename T>
+  MSGT_FORCE_INLINE void next(const T& t)
+  {
+      serialize(*this, t);
+  }
+
+  template<typename T>
+  MSGT_FORCE_INLINE OStream
+  &
+  operator<<(const T& t)
+  {
+      serialize(*this, t);
+      return *this;
+  }
+};
+
+/**
+ * \brief Length stream
+ *
+ * LStream is not what you would normally think of as a stream, but it is used in order to support
+ * allinone serializers.
+ */
+struct MSGT_API_DECL LStream {
+    static const StreamType stream_type = stream_types::Length;
+
+    LStream()
+            :count_(0) { }
+
+    /**
+     * \brief Add the length of an item to this length stream
+     */
+    template<typename T>
+    MSGT_FORCE_INLINE void next(const T& t)
+    {
+        count_ += serializationLength(t);
+    }
+
+    /**
+     * \brief increment the length by len
+     */
+    MSGT_FORCE_INLINE uint32_t advance(uint32_t len)
+    {
+        uint32_t old = count_;
+        count_ += len;
+        return old;
+    }
+
+    /**
+     * \brief Get the total length of this tream
+     */
+    inline uint32_t getLength() { return count_; }
+
+private:
+    uint32_t count_;
+};
+
+} // namespace serialization
+} // namespace message_transport
 #endif //MESSAGE_TRANSPORT_SERIALIZATION_H
