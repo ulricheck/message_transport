@@ -1,8 +1,8 @@
 #ifndef MESSAGE_TRANSPORT_PUBLISHER_PLUGIN_H
 #define MESSAGE_TRANSPORT_PUBLISHER_PLUGIN_H
 
-//#include <ros/ros.h>
-#include "message_transport/common/single_subscriber_publisher.h"
+#include <string>
+#include <boost/noncopyable.hpp>
 
 namespace message_transport {
 
@@ -19,11 +19,6 @@ namespace message_transport {
 			 * this plugin.
 			 */
 			virtual std::string getTransportName() const = 0;
-
-			/**
-			 * \brief Advertise a topic, simple version.
-			 */
-			virtual void advertise(const std::string& base_topic, uint32_t queue_size, bool latch = true) = 0;
 
 			/**
 			 * \brief Returns the number of subscribers that are currently connected to
@@ -62,26 +57,6 @@ namespace message_transport {
 		public:
 			virtual ~PublisherPlugin() {}
 
-			virtual void advertise(const std::string& base_topic, uint32_t queue_size, bool latch = true) {
-				advertiseImpl(base_topic, queue_size,
-						typename message_transport::SingleSubscriberPublisher<M>::StatusCB(),
-						typename message_transport::SingleSubscriberPublisher<M>::StatusCB(), ros::VoidPtr(), latch);
-
-			}
-
-			/**
-			 * \brief Advertise a topic with subscriber status callbacks.
-			 */
-
-			void advertise(ros::NodeHandle & nh, const std::string& base_topic, uint32_t queue_size,
-					const typename message_transport::SingleSubscriberPublisher<M>::StatusCB& connect_cb,
-					const typename message_transport::SingleSubscriberPublisher<M>::StatusCB& disconnect_cb = SingleSubscriberPublisher<M>::StatusCB(),
-					const ros::VoidPtr& tracked_object = ros::VoidPtr(), bool latch = true)
-			{
-				advertiseImpl(nh,base_topic, queue_size, 
-						connect_cb, disconnect_cb, tracked_object, latch);
-			}
-
 			/**
 			 * \brief Publish an image using the transport associated with this PublisherPlugin.
 			 */
@@ -96,13 +71,7 @@ namespace message_transport {
 			}
 
 		protected:
-			/**
-			 * \brief Advertise a topic. Must be implemented by the subclass.
-			 */
-			virtual void advertiseImpl(ros::NodeHandle & nh, const std::string& base_topic, uint32_t queue_size,
-					const typename message_transport::SingleSubscriberPublisher<M>::StatusCB& connect_cb,
-					const typename message_transport::SingleSubscriberPublisher<M>::StatusCB& disconnect_cb,
-					const ros::VoidPtr& tracked_object, bool latch) = 0;
+
 	};
 
 } //namespace message_transport

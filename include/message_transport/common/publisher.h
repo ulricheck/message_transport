@@ -35,9 +35,11 @@
 #ifndef MESSAGE_TRANSPORT_PUBLISHER_H
 #define MESSAGE_TRANSPORT_PUBLISHER_H
 
-//#include <ros/ros.h>
 #include "message_transport/common/publisher_impl.h"
 #include "message_transport/common/single_subscriber_publisher.h"
+
+#include <boost/bind.hpp>
+#include <boost/shared_ptr.hpp>
 
 namespace message_transport {
 
@@ -61,8 +63,8 @@ namespace message_transport {
 	class Publisher
 	{
 		public:
-			Publisher() {}
-			Publisher(ros::NodeHandle& nh);
+//			Publisher() {}
+			Publisher();
 
 			/*!
 			 * \brief Returns the number of subscribers that are currently connected to
@@ -81,29 +83,29 @@ namespace message_transport {
 			 * \brief Publish an image on the topics associated with this Publisher.
 			 */
 			template <class M>
-				void publish(const M& message) const
-				{
-					if (!impl_ || !impl_->isValid()) {
-						ROS_ASSERT_MSG(false, "Call to publish() on an invalid message_transport::Publisher");
-						return;
-					}
-
-					impl_->publish<M>(message);
+			void publish(const M& message) const
+			{
+				if (!impl_ || !impl_->isValid()) {
+					//ROS_ASSERT_MSG(false, "Call to publish() on an invalid message_transport::Publisher");
+					return;
 				}
+
+				impl_->publish<M>(message);
+			}
 
 			/*!
 			 * \brief Publish an image on the topics associated with this Publisher.
 			 */
 			template <class M>
-				void publish(const typename M::ConstPtr& message) const
-				{
-					if (!impl_ || !impl_->isValid()) {
-						ROS_ASSERT_MSG(false, "Call to publish() on an invalid message_transport::Publisher");
-						return;
-					}
-
-					impl_->publish<M>(message);
+			void publish(const typename M::ConstPtr& message) const
+			{
+				if (!impl_ || !impl_->isValid()) {
+					//ROS_ASSERT_MSG(false, "Call to publish() on an invalid message_transport::Publisher");
+					return;
 				}
+
+				impl_->publish<M>(message);
+			}
 
 			/*!
 			 * \brief Shutdown the advertisements associated with this Publisher.
@@ -117,49 +119,28 @@ namespace message_transport {
 
 
 			template <class M>
-				void do_initialise(ros::NodeHandle& nh, 
-						const std::string & package_name,  const std::string & class_name, 
-						const std::string& base_topic, uint32_t queue_size,
-						const typename SingleSubscriberPublisher<M>::StatusCB& connect_cb,
-						const typename SingleSubscriberPublisher<M>::StatusCB& disconnect_cb,
-						const ros::VoidPtr& tracked_object, bool latch)
-				{
-					assert(impl_ == NULL);
-					PublisherImpl<M>* impl = new PublisherImpl<M>(base_topic,package_name, class_name);
-					impl_.reset(impl);
+			void do_initialise(const std::string& base_topic)
+			{
+				assert(impl_ == NULL);
+				PublisherImpl<M>* impl = new PublisherImpl<M>(base_topic);
+				impl_.reset(impl);
 
-					BOOST_FOREACH(const std::string& lookup_name, impl->getDeclaredClasses()) {
-						try {
-                            boost::shared_ptr< PublisherPlugin<M> > pub = impl->addInstance(lookup_name);
-							pub->advertise(nh, impl->getTopic(), queue_size, 
-									rebindCB<M>(connect_cb),
-									rebindCB<M>(disconnect_cb), 
-									tracked_object, latch);
-						}
-						catch (const std::runtime_error& e) {
-							ROS_DEBUG("Failed to load plugin %s, error string: %s",
-									lookup_name.c_str(), e.what());
-						}
+				BOOST_FOREACH(const std::string& lookup_name, impl->getDeclaredClasses()) {
+					try {
+						boost::shared_ptr< PublisherPlugin<M> > pub = impl->addInstance(lookup_name);
+                        // maybe initialize an instance ??
 					}
-
-					if (impl->getNumPublishers() == 0) {
-						throw std::runtime_error("No plugins found! Does `rospack plugins --attrib=plugin "
-								"message_transport` find any packages?");
+					catch (const std::runtime_error& e) {
+						//LOG_DEBUG("Failed to load plugin %s, error string: %s", lookup_name.c_str(), e.what());
 					}
 				}
+
+				if (impl->getNumPublishers() == 0) {
+					throw std::runtime_error("No plugins found!");
+				}
+			}
 
 		private:
-
-			template <class M>
-				typename SingleSubscriberPublisher<M>::StatusCB rebindCB(const typename SingleSubscriberPublisher<M>::StatusCB& user_cb)
-				{
-					// Note: the subscriber callback must be bound to the internal Impl object, not
-					// 'this'. Due to copying behavior the Impl object may outlive this.
-					if (user_cb)
-						return boost::bind(&PublisherImplGen::subscriberCB<M>, impl_, _1, user_cb);
-					else
-						return typename SingleSubscriberPublisher<M>::StatusCB();
-				}
 
 			typedef boost::shared_ptr<PublisherImplGen> ImplPtr;
 

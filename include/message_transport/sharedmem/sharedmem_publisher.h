@@ -1,7 +1,7 @@
 #ifndef SHAREDMEM_TRANSPORT_PUBLISHER_H
 #define SHAREDMEM_TRANSPORT_PUBLISHER_H
 
-#include "message_transport/common/simple_publisher_plugin.h"
+#include "message_transport/common/publisher_plugin.h"
 #include "message_transport/sharedmem/SharedMemoryBlock.h"
 
 namespace sharedmem_transport {
@@ -13,11 +13,6 @@ namespace sharedmem_transport {
 			virtual ~SharedmemPublisherImpl();
 
 			uint32_t initialise(const std::string & topic);
-
-//            void setNodeHandle(ros::NodeHandle & nh) {
-//                nh_ = nh;
-//            }
-
 
             template <class M>
 			void publish_msg(const M& message) {
@@ -42,17 +37,16 @@ namespace sharedmem_transport {
 			// This will be modified after the first image is received, so we
 			// mark them mutable and publish stays "const"
             shm_handle shm_handle_;
-//            ros::NodeHandle nh_;
-			
+
 	};
 
 	template <class Base>
 	class SharedmemPublisher : 
-		public message_transport::SimplePublisherPlugin<Base,sharedmem_transport::SharedMemHeader>
+		public message_transport::PublisherPlugin<Base>
 	{
 		public:
 			SharedmemPublisher() : 
-                message_transport::SimplePublisherPlugin<Base,sharedmem_transport::SharedMemHeader>(true), // force latch
+                message_transport::PublisherPlugin<Base>(),
                 first_run_(true) {}
 			virtual ~SharedmemPublisher() {}
 
@@ -61,28 +55,32 @@ namespace sharedmem_transport {
 				return "sharedmem";
 			}
 
-		protected:
-			virtual void postAdvertiseInit() {
-				impl.setNodeHandle(this->getNodeHandle());
-			}
+			virtual uint32_t getNumSubscribers() {
+				// @todo future work: extend sharedmem_transport to support subscriber counting ..
+				return 1;
+			};
 
-			virtual void publish(const Base& message,
-					const typename message_transport::SimplePublisherPlugin<Base,sharedmem_transport::SharedMemHeader>::PublishFn& publish_fn) const {
-                if (first_run_) {
-                    ROS_INFO("First publish run");
-                    SharedMemHeader header;
-                    header.handle = impl.initialise(this->getTopic());
-                    ROS_INFO("Publishing latched header");
-                    publish_fn(header);
-                    first_run_ = false;
-                }
+		virtual void shutdown() {
+			// some shutdown action needed ?
+		}
+
+		protected:
+
+			virtual void publish(const Base& message) const {
                 //LOG_DEBUG("Publishing shm message");
+				if (first_run_) {
+					//LOG_INFO("First publish run");
+					uint32_t handle = impl.initialise(this->getTopic());
+					// @todo should publish the availability of a message-topic on a shm-message-queue
+					//LOG_INFO("Publishing latched header");
+					first_run_ = false;
+				}
                 impl.publish_msg(message);
 			}
 
 			mutable SharedmemPublisherImpl impl;
             mutable bool first_run_;
-			
+
 	};
 
 } //namespace sharedmem_transport

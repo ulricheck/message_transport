@@ -1,23 +1,18 @@
 
 set(MSGT_COMMON_HEADERS
-        ${CMAKE_SOURCE_DIR}/include/message_transport/common/message_transport.h
         ${CMAKE_SOURCE_DIR}/include/message_transport/common/publisher.h
         ${CMAKE_SOURCE_DIR}/include/message_transport/common/publisher_impl.h
         ${CMAKE_SOURCE_DIR}/include/message_transport/common/publisher_plugin.h
-        ${CMAKE_SOURCE_DIR}/include/message_transport/common/raw_publisher.h
-        ${CMAKE_SOURCE_DIR}/include/message_transport/common/raw_subscriber.h
-        ${CMAKE_SOURCE_DIR}/include/message_transport/common/simple_publisher_plugin.h
-        ${CMAKE_SOURCE_DIR}/include/message_transport/common/simple_subscriber_plugin.h
-        ${CMAKE_SOURCE_DIR}/include/message_transport/common/single_subscriber_publisher.h
         ${CMAKE_SOURCE_DIR}/include/message_transport/common/subscriber.h
         ${CMAKE_SOURCE_DIR}/include/message_transport/common/subscriber_impl.h
         ${CMAKE_SOURCE_DIR}/include/message_transport/common/subscriber_plugin.h
-        ${CMAKE_SOURCE_DIR}/include/message_transport/common/transport_hints.h
         )
 
 set(MSGT_COMMON_SOURCES
         ${CMAKE_SOURCE_DIR}/src/common/publisher.cpp
+        ${CMAKE_SOURCE_DIR}/src/common/publisher_impl.cpp
         ${CMAKE_SOURCE_DIR}/src/common/subscriber.cpp
+        ${CMAKE_SOURCE_DIR}/src/common/subscriber_impl.cpp
         )
 
 set(MSGT_SHAREDMEM_HEADERS

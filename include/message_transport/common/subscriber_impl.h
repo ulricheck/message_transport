@@ -1,39 +1,6 @@
 #ifndef MESSAGE_TRANSPORT_SUBSCRIBER_IMPL_H
 #define MESSAGE_TRANSPORT_SUBSCRIBER_IMPL_H
 
-/*********************************************************************
-* Software License Agreement (BSD License)
-* 
-*  Copyright (c) 2009, Willow Garage, Inc.
-*  All rights reserved.
-* 
-*  Redistribution and use in source and binary forms, with or without
-*  modification, are permitted provided that the following conditions
-*  are met:
-* 
-*   * Redistributions of source code must retain the above copyright
-*     notice, this list of conditions and the following disclaimer.
-*   * Redistributions in binary form must reproduce the above
-*     copyright notice, this list of conditions and the following
-*     disclaimer in the documentation and/or other materials provided
-*     with the distribution.
-*   * Neither the name of the Willow Garage nor the names of its
-*     contributors may be used to endorse or promote products derived
-*     from this software without specific prior written permission.
-* 
-*  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-*  "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-*  LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
-*  FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
-*  COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
-*  INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
-*  BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-*  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
-*  CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
-*  LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
-*  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-*  POSSIBILITY OF SUCH DAMAGE.
-*********************************************************************/
 
 #include <vector>
 #include "message_transport/common/subscriber_plugin.h"
@@ -56,7 +23,7 @@ namespace message_transport {
 				return !unsubscribed_;
 			}
 
-			virtual void reset() = 0;
+			virtual void reset(const std::string& transport_name) = 0;
 			void shutdown() {
 				this->shutdownImpl();
 			}
@@ -79,9 +46,7 @@ namespace message_transport {
     class  SubscriberImpl : public SubscriberImplGen
 	{
 		public:
-			SubscriberImpl(const std::string & packageName,const std::string & className)
-				: loader_(packageName, 
-						std::string("message_transport::SubscriberPlugin<")+className+">") { }
+			SubscriberImpl() { }
 
 			~SubscriberImpl() {
 				shutdownImpl();
@@ -95,22 +60,13 @@ namespace message_transport {
 				}
 			}
 
-			virtual void reset() {
-				std::string lookup_name = SubscriberPluginGen::getLookupName();
-                // @todo replace pluginlib with hardcoded instance creation
-				//subscriber_ = loader_.createInstance(lookup_name);
-			}
+			virtual void reset(const std::string& transport_name);
 
 			virtual boost::shared_ptr< SubscriberPluginGen > getSubscriber() {
 				return subscriber_;
 			}
 
-			virtual std::vector<std::string> getDeclaredClasses() {
-                std::vector< std::string> result;
-                // @todo list available transports manually for now
-				//return loader_.getDeclaredClasses();
-                return result;
-			}
+			virtual std::vector<std::string> getDeclaredClasses();
 
 		protected:
 

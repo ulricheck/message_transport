@@ -5,13 +5,13 @@
 #include <boost/thread.hpp>
 #include <boost/interprocess/managed_shared_memory.hpp>
 
-#include <message_transport/common/simple_subscriber_plugin.h>
+#include <message_transport/common/subscriber_plugin.h>
 #include <message_transport/sharedmem/SharedMemoryBlock.h>
 
 namespace sharedmem_transport {
 
 	template <class Base>
-	class SharedmemSubscriber : public message_transport::SimpleSubscriberPlugin<Base,sharedmem_transport::SharedMemHeader>
+	class SharedmemSubscriber : public message_transport::SubscriberPlugin<Base>
 	{
 		public:
 			SharedmemSubscriber() {
@@ -38,39 +38,39 @@ namespace sharedmem_transport {
 				return "sharedmem";
 			}
 
+
+
 		protected:
             void receiveThread() {
                 //LOG_DEBUG("Receive thread running");
-                while (ros::ok()) {
+                while (is_running) {
                     //LOG_DEBUG("Waiting for data");
                     boost::shared_ptr<Base> message_ptr(new Base);
-                    if (blockmgr_->wait_data(*segment_, shm_handle_, *message_ptr)
-                            && user_cb_ && ros::ok()) {
+                    if (blockmgr_->wait_data(*segment_, shm_handle_, *message_ptr) && user_cb_) {
                         (*user_cb_)(message_ptr);
                     }
                 }
                 //LOG_DEBUG("Unregistering client");
             }
 
-			virtual void internalCallback(const sharedmem_transport::SharedMemHeaderConstPtr& message,
-					const typename message_transport::SimpleSubscriberPlugin<Base,sharedmem_transport::SharedMemHeader>::Callback& user_cb)
+			virtual void startReceiving(const typename message_transport::SubscriberPlugin<Base>::Callback& user_cb)
 			{
 				user_cb_ = &user_cb;
                 //LOG_DEBUG("received latched message");
                 if (!segment_) {
                     try {
-                    segment_ = new boost::interprocess::managed_shared_memory(boost::interprocess::open_only,ROSSharedMemoryDefaultBlock);
+                    segment_ = new boost::interprocess::managed_shared_memory(boost::interprocess::open_only,MSGTSharedMemoryDefaultBlock);
                     //LOG_DEBUG("Connected to segment");
                     } catch (boost::interprocess::bad_alloc e) {
                         segment_ = NULL;
-                        ROS_ERROR("Failed to connect to shared memory segment");
+                        //LOG_ERROR("Failed to connect to shared memory segment");
                         return;
                     }
                     blockmgr_ = (segment_->find<SharedMemoryBlock>("Manager")).first;
                     if (!blockmgr_) {
                         delete segment_;
                         segment_ = NULL;
-                        ROS_ERROR("Cannot find Manager block in shared memory segment");
+                        //LOG_ERROR("Cannot find Manager block in shared memory segment");
                         return;
                     }
                     //LOG_DEBUG("Got block mgr %p",blockmgr_);
@@ -81,13 +81,13 @@ namespace sharedmem_transport {
                     } else {
                         delete segment_;
                         segment_ = NULL;
-                        ROS_ERROR("Cannot find memory block for %s", this->getTopic().c_str());
+                        //LOG_ERROR("Cannot find memory block for %s", this->getTopic().c_str());
                     }
                 }
 			}
 
 
-			const typename message_transport::SimpleSubscriberPlugin<Base,sharedmem_transport::SharedMemHeader>::Callback* user_cb_;
+			const typename message_transport::SubscriberPlugin<Base>::Callback* user_cb_;
             boost::thread *rec_thread_;
 			boost::interprocess::managed_shared_memory *segment_ ;
             SharedMemoryBlock *blockmgr_;

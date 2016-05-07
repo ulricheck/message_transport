@@ -49,12 +49,12 @@ namespace message_transport {
 	};
 
 	template <class M>
-		class SubscriberPlugin : public SubscriberPluginGen
+	class SubscriberPlugin : public SubscriberPluginGen
 	{
 		public:
 			typedef boost::function<void(const typename M::ConstPtr&)> Callback;
 
-			virtual ~SubscriberPlugin() {}
+			virtual ~SubscriberPlugin() : is_running(false) {}
 
 			/**
 			 * \brief Subscribe to an image topic, version for arbitrary boost::function object.
@@ -93,12 +93,42 @@ namespace message_transport {
 				return subscribe(base_topic, queue_size, boost::bind(fp, obj.get(), _1), obj);
 			}
 
+			// @todo implement unsubscribe
+
+            virtual void shutdown() {
+                is_running = false;
+            }
+
 		protected:
+
+			/**
+			 * \brief Process a message. Must be implemented by the subclass.
+			 *
+			 * @param message A message from the PublisherPlugin.
+			 * @param user_cb The user Message callback to invoke, if appropriate.
+			 */
+			virtual void startReceiving(const typename SubscriberPlugin<M>::Callback& user_cb) = 0;
+
 			/**
 			 * \brief Subscribe to an image transport topic. Must be implemented by the subclass.
 			 */
 			virtual void subscribeImpl(const std::string& base_topic, uint32_t queue_size,
-					const Callback& callback) = 0;
+					const Callback& callback) {
+
+                if (!is_running) {
+                    base_topic = base_topic;
+                    is_running = true;
+                    // @todo subscriber should advertise that it is listening ..
+                    startReceiving(callback);
+
+                } else {
+                    //LOG_ERROR("Subscriber is already running.");
+                    throw std::runtime_error("Subscriber is already running.");
+                }
+			}
+
+		bool is_running;
+        std::string base_topic;
 	};
 
 } //namespace message_transport

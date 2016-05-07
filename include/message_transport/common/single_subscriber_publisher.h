@@ -1,7 +1,6 @@
 #ifndef MESSAGE_TRANSPORT_SINGLE_SUBSCRIBER_PUBLISHER
 #define MESSAGE_TRANSPORT_SINGLE_SUBSCRIBER_PUBLISHER
 
-//#include <ros/ros.h>
 #include <boost/noncopyable.hpp>
 #include <boost/function.hpp>
 
@@ -12,7 +11,7 @@ namespace message_transport {
 	 * subscriber connection callbacks.
 	 */
 	template <class M>
-		class SingleSubscriberPublisher : boost::noncopyable
+	class SingleSubscriberPublisher : boost::noncopyable
 	{
 		public:
 			typedef boost::function<uint32_t()> GetNumSubscribersFn;

@@ -38,35 +38,37 @@ namespace sharedmem_transport {
             //ros::service::waitForService("/sharedmem_manager/get_blocks");
             //LOG_INFO("Connecting to shared memory segment");
 
-                std::string segment_name = MSGTSharedMemoryDefaultBlock;
-                // @todo Publisher needs configuration
-                //nh_.param<std::string>("/sharedmem_manager/segment_name",segment_name,MSGTSharedMemoryDefaultBlock);
-                //LOG_INFO("Got segment name: %s", segment_name.c_str());
-                try {
-                    segment_ = new managed_shared_memory(open_only,segment_name.c_str());
-                    //LOG_INFO("Got segment %p",segment_);
-                } catch (boost::interprocess::bad_alloc e) {
-                    segment_ = NULL;
-                    //LOG_ERROR("Could not open shared memory segment");
-                    return -1;
-                }
-                blockmgr_ = (segment_->find<SharedMemoryBlock>("Manager")).first;
-                if (!blockmgr_) {
-                    delete segment_;
-                    segment_ = NULL;
-                    //LOG_ERROR("Cannot find Manager block in shared memory segment");
-                    return -1;
-                }
-                //LOG_INFO("Got manager %p",blockmgr_);
-                try {
-                    shm_handle_ = blockmgr_->allocateBlock(*segment_,topic.c_str(),16);
-                    //LOG_INFO("Got shm handle");
-                } catch (boost::interprocess::bad_alloc e) {
-                    delete segment_;
-                    segment_ = NULL;
-                    //LOG_ERROR("Could not open shared memory segment");
-                    return -1;
-                }
+            // @todo Publisher should advertise topic availability
+
+            // @todo Publisher needs configuration of shm-segment name
+            std::string segment_name = MSGTSharedMemoryDefaultBlock;
+            //nh_.param<std::string>("/sharedmem_manager/segment_name",segment_name,MSGTSharedMemoryDefaultBlock);
+            //LOG_INFO("Got segment name: %s", segment_name.c_str());
+            try {
+                segment_ = new managed_shared_memory(open_only,segment_name.c_str());
+                //LOG_INFO("Got segment %p",segment_);
+            } catch (boost::interprocess::bad_alloc e) {
+                segment_ = NULL;
+                //LOG_ERROR("Could not open shared memory segment");
+                return -1;
+            }
+            blockmgr_ = (segment_->find<SharedMemoryBlock>("Manager")).first;
+            if (!blockmgr_) {
+                delete segment_;
+                segment_ = NULL;
+                //LOG_ERROR("Cannot find Manager block in shared memory segment");
+                return -1;
+            }
+            //LOG_INFO("Got manager %p",blockmgr_);
+            try {
+                shm_handle_ = blockmgr_->allocateBlock(*segment_,topic.c_str(),16);
+                //LOG_INFO("Got shm handle");
+            } catch (boost::interprocess::bad_alloc e) {
+                delete segment_;
+                segment_ = NULL;
+                //LOG_ERROR("Could not open shared memory segment");
+                return -1;
+            }
 		}
         return shm_handle_.handle;
 	}
