@@ -89,7 +89,7 @@ namespace pt = boost::property_tree;
 			void do_initialise(const std::string& base_topic)
 			{
 				assert(impl_ == NULL);
-				PublisherImpl<M>* impl = new PublisherImpl<M>(base_topic);
+				PublisherImpl<M>* impl = new PublisherImpl<M>(config_, base_topic);
 				impl_.reset(impl);
 
 				BOOST_FOREACH(const std::string& lookup_name, impl->getDeclaredClasses()) {

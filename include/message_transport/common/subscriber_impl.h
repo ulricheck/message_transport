@@ -8,6 +8,9 @@
 #include <boost/scoped_ptr.hpp>
 #include <boost/property_tree/ptree.hpp>
 
+// not nice - for now to avoid replicate ros::pluginlib
+#include "message_transport/sharedmem/sharedmem_subscriber.h"
+
 namespace message_transport {
 namespace pt = boost::property_tree;
 
@@ -63,13 +66,27 @@ namespace pt = boost::property_tree;
 				}
 			}
 
-			virtual void reset(const std::string& transport_name);
-
 			virtual boost::shared_ptr< SubscriberPluginGen > getSubscriber() {
 				return subscriber_;
 			}
 
-			virtual std::vector<std::string> getDeclaredClasses();
+
+            virtual std::vector<std::string> getDeclaredClasses()
+            {
+                std::vector<std::string> result;
+                result.push_back("sharedmem_sub");
+                return result;
+            }
+
+            virtual void reset(const std::string& transport_name)
+            {
+                std::string lookup_name = SubscriberPluginGen::getLookupName(transport_name);
+                if (lookup_name.compare("sharedmem_sub") == 0) {
+                    subscriber_.reset(new sharedmem_transport::SharedmemSubscriber<M>(config_));
+                } else {
+                    throw std::runtime_error("Invalid transport");
+                }
+            }
 
 		protected:
 

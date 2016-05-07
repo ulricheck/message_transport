@@ -6,9 +6,11 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/program_options.hpp>
 #include <boost/property_tree/ptree.hpp>
+#include <boost/thread.hpp>
+#include <boost/chrono.hpp>
 
 #include "message_transport/logging.h"
-#include "message_transport/common/subscriber.h"
+#include "message_transport/common/publisher.h"
 #include "message_transport/sharedmem/SharedMemoryBlock.h"
 #include "message_transport/serialization/message_types.h"
 
@@ -17,19 +19,11 @@ namespace pt = boost::property_tree;
 namespace mt = message_transport;
 namespace mts = message_transport::serialization;
 
-
-int receive_count = 0;
-void test_callback(const boost::shared_ptr<const mts::TestMessage> &m) {
-    std::cout << "received: " << m->value << std::endl;
-    receive_count++;
-}
-
-
-
 int main(int argc, char **argv)
 {
     std::string segment_name = MSGTSharedMemoryDefaultBlock;
     int segment_size = 1000000;
+    int num_messages = 100;
 
     try {
 
@@ -73,16 +67,20 @@ int main(int argc, char **argv)
     config->put_child("segment_name", e1);
     config->put_child("segment_size", e2);
 
-    LOG_INFO("Create Subscriber - segment: " << segment_name);
-    mt::Subscriber sub(config);
-    LOG_INFO("Subscribe to topic: test_message");
-    sub.do_subscribe<mts::TestMessage>("test_message", "sharedmem", 1, &test_callback);
+    LOG_INFO("Create Publisher - segment: " << segment_name);
+    mt::Publisher pub(config);
+    LOG_INFO("Initialize to topic: test_message");
+    pub.do_initialise<mts::TestMessage>("test_message");
 
-    std::cout << "press enter to exit" << std::endl;
-    std::cin.ignore();
+    int send_count = 0;
+    while (send_count < num_messages) {
+        mts::TestMessage msg(1);
+        pub.publish(msg);
+        boost::this_thread::sleep_for( boost::chrono::milliseconds(500) );
+    }
 
-    LOG_INFO("Shutdown Subscriber");
-    sub.shutdown();
+    LOG_INFO("Shutdown Publisher");
+    pub.shutdown();
 
     return 0;
 }

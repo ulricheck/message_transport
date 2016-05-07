@@ -12,6 +12,9 @@
 #include <boost/algorithm/string/erase.hpp>
 #include <boost/property_tree/ptree.hpp>
 
+// not nice - for now to avoid replicate ros::pluginlib
+#include "message_transport/sharedmem/sharedmem_publisher.h"
+
 namespace message_transport {
 namespace pt = boost::property_tree;
 
@@ -93,9 +96,25 @@ namespace pt = boost::property_tree;
                 }
 			}
 
-			virtual std::vector<std::string> getDeclaredClasses();
+            virtual std::vector<std::string> getDeclaredClasses()
+            {
+                std::vector<std::string> result;
+                result.push_back("sharedmem_pub");
+                return result;
+            }
 
-            boost::shared_ptr< PublisherPlugin<M> > addInstance(const std::string & name);
+            boost::shared_ptr<PublisherPlugin<M> > addInstance(const std::string& name)
+            {
+                boost::shared_ptr<PublisherPlugin<M> > pub; // = loader_.createInstance(name);
+                if (name.compare("sharedmem_pub") == 0) {
+                    pub.reset(new sharedmem_transport::SharedmemPublisher<M>(config_, base_topic_));
+                } else {
+                    throw std::runtime_error("Invalid transport");
+                }
+                publishers_.push_back(pub);
+                return pub;
+            }
+
 
 			uint32_t getNumPublishers() const {
 				return publishers_.size();

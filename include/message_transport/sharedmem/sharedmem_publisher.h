@@ -52,8 +52,8 @@ namespace pt = boost::property_tree;
 		public message_transport::PublisherPlugin<Base>
 	{
 		public:
-			SharedmemPublisher(const boost::shared_ptr< pt::ptree >& config) :
-                message_transport::PublisherPlugin<Base>(config),
+			SharedmemPublisher(const boost::shared_ptr< pt::ptree >& config, const std::string& base_topic) :
+                message_transport::PublisherPlugin<Base>(config, base_topic),
                 impl(config),
                 first_run_(true) {}
 

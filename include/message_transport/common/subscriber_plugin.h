@@ -61,10 +61,19 @@ namespace pt = boost::property_tree;
 		public:
 			typedef boost::function<void(const typename M::ConstPtr&)> Callback;
 
-        SubscriberPlugin(const boost::shared_ptr< pt::ptree >& config)  :
-                SubscriberPluginGen(config), is_running(false), base_topic_("") {}
+            SubscriberPlugin(const boost::shared_ptr< pt::ptree >& config)  :
+                    SubscriberPluginGen(config), is_running(false), base_topic_("") {}
 
-        virtual ~SubscriberPlugin() {}
+            virtual ~SubscriberPlugin() {}
+
+            virtual uint32_t getNumPublishers() const {
+                // @todo needs infrastructure for publisher counting
+                return 1;
+            }
+
+            virtual std::string getTopic() const {
+                return base_topic_;
+            }
 
 			/**
 			 * \brief Subscribe to an image topic, version for arbitrary boost::function object.
