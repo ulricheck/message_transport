@@ -6,6 +6,8 @@ set(MSGT_COMMON_HEADERS
         ${CMAKE_SOURCE_DIR}/include/message_transport/common/subscriber.h
         ${CMAKE_SOURCE_DIR}/include/message_transport/common/subscriber_impl.h
         ${CMAKE_SOURCE_DIR}/include/message_transport/common/subscriber_plugin.h
+        ${CMAKE_SOURCE_DIR}/include/message_transport/serialization/message_schema.h
+        ${CMAKE_SOURCE_DIR}/include/message_transport/serialization/serialization.h
         )
 
 set(MSGT_COMMON_SOURCES
@@ -32,7 +34,7 @@ set(MSGT_MANAGER_SOURCES
         ${CMAKE_SOURCE_DIR}/src/sharedmem/sharedmem_manager.cpp
         )
 
-add_library(msgt_common SHARED ${MSGT_COMMON_SOURCES} ${MSGT_COMMON_HEADERS})
+add_library(msgt_common SHARED ${MSGT_COMMON_SOURCES} ${MSGT_COMMON_HEADERS} ${SCHEMA_HEADERS})
 target_link_libraries(msgt_common ${requiredLibs})
 
 add_library(msgt_sharedmem SHARED ${MSGT_SHAREDMEM_SOURCES} ${MSGT_SHAREDMEM_HEADERS})
