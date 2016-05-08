@@ -15,15 +15,26 @@ namespace serialization {
 
 // for now only testing ..
 
-class TestMessage {
+template <class ContainerAllocator>
+class TestMessage_ {
 public:
-    typedef boost::shared_ptr<TestMessage const> ConstPtr;
 
-    TestMessage() : value(0) {}
-    TestMessage(int value_) : value(value_) {}
+    typedef TestMessage_<ContainerAllocator> Type;
+    typedef boost::shared_ptr< TestMessage_<ContainerAllocator> > Ptr;
+    typedef boost::shared_ptr< TestMessage_<ContainerAllocator>  const> ConstPtr;
+
+
+    TestMessage_() : value(0) {}
+    TestMessage_(const ContainerAllocator& _alloc) : value(0) {}
+
 
     int value;
 };
+typedef TestMessage_<std::allocator<void> > TestMessage;
+
+typedef boost::shared_ptr< TestMessage> TestMessagePtr;
+typedef boost::shared_ptr< TestMessage const> TestMessageConstPtr;
+
 
 
 /**

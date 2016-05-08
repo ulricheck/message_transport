@@ -3,6 +3,7 @@
 //
 
 #include <iostream>
+#include <boost/function.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/program_options.hpp>
 #include <boost/property_tree/ptree.hpp>
@@ -19,7 +20,8 @@ namespace mts = message_transport::serialization;
 
 
 int receive_count = 0;
-void test_callback(const boost::shared_ptr<const mts::TestMessage> &m) {
+
+void test_callback(const mts::TestMessageConstPtr& m) {
     std::cout << "received: " << m->value << std::endl;
     receive_count++;
 }
@@ -76,7 +78,9 @@ int main(int argc, char **argv)
     LOG_INFO("Create Subscriber - segment: " << segment_name);
     mt::Subscriber sub(config);
     LOG_INFO("Subscribe to topic: test_message");
-    sub.do_subscribe<mts::TestMessage>("test_message", "sharedmem", 1, &test_callback);
+    boost::function< void ( const mts::TestMessageConstPtr& ) > cb;
+    cb = &test_callback;
+    sub.do_subscribe<mts::TestMessage>("test_message", "sharedmem", 1, cb);
 
     std::cout << "press enter to exit" << std::endl;
     std::cin.ignore();

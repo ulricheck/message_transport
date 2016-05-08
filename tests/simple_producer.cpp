@@ -74,9 +74,12 @@ int main(int argc, char **argv)
 
     int send_count = 0;
     while (send_count < num_messages) {
-        mts::TestMessage msg(1);
+        mts::TestMessage msg;
+        msg.value = send_count;
+        LOG_INFO("Sending message: " << send_count);
         pub.publish(msg);
         boost::this_thread::sleep_for( boost::chrono::milliseconds(500) );
+        send_count++;
     }
 
     LOG_INFO("Shutdown Publisher");
