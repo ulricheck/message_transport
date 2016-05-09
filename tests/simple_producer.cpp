@@ -12,7 +12,7 @@
 #include "message_transport/logging.h"
 #include "message_transport/common/publisher.h"
 #include "message_transport/sharedmem/SharedMemoryBlock.h"
-#include "message_transport/serialization/message_types.h"
+#include "message_types.h"
 
 
 namespace pt = boost::property_tree;
