@@ -105,9 +105,8 @@ namespace sharedmem_transport {
                 }
                 LOG_DEBUG("Serialising to " << dest.ptr << ", " << descriptors[dest.handle].size_ << " bytes");
 
-                // @todo Imlement deserialization for Message Types
-//                ros::serialization::OStream out(dest.ptr,descriptors[dest.handle].size_);
-//                ros::serialization::serialize(out, msg);
+                message_transport::serialization::OStream out(dest.ptr,descriptors[dest.handle].size_);
+                message_transport::serialization::serialize(out, msg);
 
                 unregister_global_client();
                 LOG_DEBUG("serialize: global clients released");
@@ -129,9 +128,8 @@ namespace sharedmem_transport {
                 }
                 LOG_DEBUG("Deserialising from " << src.ptr << ", " << descriptors[src.handle].size_ << " bytes");
 
-                // @todo Implement serialization for Message Types
-//                ros::serialization::IStream in(src.ptr,descriptors[src.handle].size_);
-//                ros::serialization::deserialize(in, msg);
+                message_transport::serialization::IStream in(src.ptr,descriptors[src.handle].size_);
+                message_transport::serialization::deserialize(in, msg);
             }
 
             

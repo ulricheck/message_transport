@@ -7,7 +7,6 @@
 #include <boost/scoped_ptr.hpp>
 #include <boost/property_tree/ptree.hpp>
 
-#include "message_transport/message_transport_macros.h"
 #include "message_transport/common/subscriber_plugin.h"
 
 // not nice - for now to avoid replicate ros::pluginlib
@@ -51,7 +50,7 @@ namespace pt = boost::property_tree;
 	};
 
 	template <class M>
-    class  MSGT_API_DECL SubscriberImpl : public SubscriberImplGen
+    class SubscriberImpl : public SubscriberImplGen
 	{
 		public:
 			SubscriberImpl(const boost::shared_ptr< pt::ptree >& config) : SubscriberImplGen(config) { }

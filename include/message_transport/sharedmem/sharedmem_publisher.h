@@ -1,7 +1,6 @@
 #ifndef SHAREDMEM_TRANSPORT_PUBLISHER_H
 #define SHAREDMEM_TRANSPORT_PUBLISHER_H
 
-#include "message_transport/message_transport_macros.h"
 #include "message_transport/common/publisher_plugin.h"
 #include "message_transport/serialization/serialization.h"
 #include "message_transport/sharedmem/SharedMemoryBlock.h"
@@ -49,7 +48,7 @@ namespace pt = boost::property_tree;
 	};
 
 	template <class Base>
-	class MSGT_API_DECL SharedmemPublisher : 
+	class SharedmemPublisher :
 		public message_transport::PublisherPlugin<Base>
 	{
 		public:

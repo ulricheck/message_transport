@@ -12,7 +12,6 @@
 #include <boost/property_tree/ptree.hpp>
 
 #include "message_transport/common/publisher_plugin.h"
-#include "message_transport/message_transport_macros.h"
 
 // not nice - for now to avoid replicate ros::pluginlib
 #include "message_transport/sharedmem/sharedmem_publisher.h"
@@ -20,7 +19,7 @@
 namespace message_transport {
 namespace pt = boost::property_tree;
 
-	class MSGT_API_DECL PublisherImplGen
+	class PublisherImplGen
 	{
 		public:
 			PublisherImplGen(const boost::shared_ptr< pt::ptree >& config, const std::string & topic) :

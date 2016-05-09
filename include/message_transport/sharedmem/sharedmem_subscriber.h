@@ -6,7 +6,6 @@
 #include <boost/interprocess/managed_shared_memory.hpp>
 #include <boost/property_tree/ptree.hpp>
 
-#include "message_transport/message_transport_macros.h"
 #include "message_transport/common/subscriber_plugin.h"
 #include "message_transport/sharedmem/SharedMemoryBlock.h"
 #include "message_transport/logging.h"
@@ -16,7 +15,7 @@ namespace sharedmem_transport {
 namespace pt = boost::property_tree;
 
 	template <class Base>
-	class MSGT_API_DECL SharedmemSubscriber : public message_transport::SubscriberPlugin<Base>
+	class SharedmemSubscriber : public message_transport::SubscriberPlugin<Base>
 	{
 		public:
 			SharedmemSubscriber(const boost::shared_ptr< pt::ptree >& config)

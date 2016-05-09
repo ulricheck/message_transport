@@ -14,12 +14,14 @@ set(MSGT_COMMON_HEADERS
         ${CMAKE_SOURCE_DIR}/include/message_transport/common/subscriber_impl.h
         ${CMAKE_SOURCE_DIR}/include/message_transport/common/subscriber_plugin.h
         ${CMAKE_SOURCE_DIR}/include/message_transport/serialization/serialization.h
+        ${CMAKE_SOURCE_DIR}/include/message_transport/serialization/message_types.h
         )
 
 set(MSGT_COMMON_SOURCES
         ${CMAKE_CURRENT_SOURCE_DIR}/common/publisher.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/common/subscriber.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/serialization/serialization.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/serialization/message_types.cpp
         )
 
 set(MSGT_SHAREDMEM_HEADERS
