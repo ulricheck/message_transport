@@ -7,7 +7,7 @@
 #include "message_transport/common/publisher_impl.h"
 #include "message_transport/common/subscriber_impl.h"
 
-#include "message_transport/serialization/message_types.h"
+#include "message_types.h"
 
 
 template class sharedmem_transport::SharedmemSubscriber<message_transport::serialization::TestMessage>;
