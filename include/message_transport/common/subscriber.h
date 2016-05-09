@@ -2,8 +2,11 @@
 #ifndef MESSAGE_TRANSPORT_SUBSCRIBER_H
 #define MESSAGE_TRANSPORT_SUBSCRIBER_H
 
-#include "message_transport/common/subscriber_impl.h"
+
 #include <boost/property_tree/ptree.hpp>
+
+#include "message_transport/common/subscriber_impl.h"
+#include "message_transport/message_transport_macros.h"
 
 namespace message_transport {
 namespace pt = boost::property_tree;
@@ -23,7 +26,7 @@ namespace pt = boost::property_tree;
 	 * associated with that handle will stop being called. Once all Subscriber for a given
 	 * topic go out of scope the topic will be unsubscribed.
 	 */
-	class Subscriber
+	class MSGT_API_DECL Subscriber
 	{
 		public:
 			// need to pass topic here ??

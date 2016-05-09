@@ -10,6 +10,8 @@
 #include <boost/type_traits/remove_const.hpp>
 #include <boost/type_traits/remove_reference.hpp>
 
+#include "message_transport/message_transport_types.h"
+
 namespace message_transport {
 namespace message_traits {
 

@@ -9,9 +9,13 @@
 #include <stdexcept>
 #include <string>
 
+#ifdef _MSC_VER
+#pragma warning( disable : 4275 )
+#endif
+
 namespace message_transport {
 
-class Exception : public std::runtime_error
+class MSGT_API_DECL Exception : public std::runtime_error
 {
 public:
     Exception(const std::string& what)

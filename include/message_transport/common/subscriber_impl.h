@@ -3,10 +3,11 @@
 
 
 #include <vector>
-#include "message_transport/common/subscriber_plugin.h"
 #include <boost/shared_ptr.hpp>
 #include <boost/scoped_ptr.hpp>
 #include <boost/property_tree/ptree.hpp>
+
+#include "message_transport/common/subscriber_plugin.h"
 
 // not nice - for now to avoid replicate ros::pluginlib
 #include "message_transport/sharedmem/sharedmem_subscriber.h"

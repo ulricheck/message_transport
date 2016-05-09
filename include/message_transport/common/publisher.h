@@ -1,11 +1,12 @@
 #ifndef MESSAGE_TRANSPORT_PUBLISHER_H
 #define MESSAGE_TRANSPORT_PUBLISHER_H
 
-#include "message_transport/common/publisher_impl.h"
-
 #include <boost/bind.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/property_tree/ptree.hpp>
+
+#include "message_transport/common/publisher_impl.h"
+#include "message_transport/message_transport_macros.h"
 
 namespace message_transport {
 namespace pt = boost::property_tree;
@@ -27,7 +28,7 @@ namespace pt = boost::property_tree;
 	 * associated with that handle will stop being called. Once all Publisher for a
 	 * given base topic go out of scope the topic (and all subtopics) will be unadvertised.
 	 */
-	class Publisher
+	class MSGT_API_DECL Publisher
 	{
 		public:
 			Publisher(const boost::shared_ptr< pt::ptree >& config) : config_(config) {}

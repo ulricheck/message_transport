@@ -3,3 +3,11 @@
 //
 
 #include "message_transport/serialization/serialization.h"
+
+namespace message_transport {
+
+	void throwStreamOverrun() {
+		throw StreamOverrunException("Buffer Overrun");
+	}
+
+}

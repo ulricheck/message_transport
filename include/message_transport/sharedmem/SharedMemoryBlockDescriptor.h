@@ -9,10 +9,16 @@
 #include <boost/interprocess/sync/scoped_lock.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
 
+#include "message_transport/message_transport_macros.h"
+
+#ifdef _MSC_VER
+#pragma warning( disable : 4251 )
+#endif
+
 namespace sharedmem_transport {
 
 
-    struct SharedMemoryBlockDescriptor
+    struct MSGT_API_DECL SharedMemoryBlockDescriptor
     {
         SharedMemoryBlockDescriptor();
         uint32_t getSize() const ;

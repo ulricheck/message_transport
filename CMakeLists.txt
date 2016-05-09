@@ -14,16 +14,17 @@ ENDIF(APPLE)
 
 set(requiredLibs "")
 
-function(compile_flatbuffers_schema_to_cpp SRC_FBS)
-    get_filename_component(SRC_FBS_DIR ${SRC_FBS} PATH)
-    string(REGEX REPLACE "\\.fbs$" "_generated.h" GEN_HEADER ${SRC_FBS})
-    add_custom_command(
-            OUTPUT ${GEN_HEADER}
-            COMMAND "${FLATBUFFERS_FLATC_EXECUTABLE}" -c --no-includes --gen-mutable -o "${SRC_FBS_DIR}" "${CMAKE_SOURCE_DIR}/${SRC_FBS}")
-endfunction()
-
-find_package(FlatBuffers REQUIRED)
+find_package(FlatBuffers)
 if(FLATBUFFERS_FOUND)
+
+  function(compile_flatbuffers_schema_to_cpp SRC_FBS)
+      get_filename_component(SRC_FBS_DIR ${SRC_FBS} PATH)
+      string(REGEX REPLACE "\\.fbs$" "_generated.h" GEN_HEADER ${SRC_FBS})
+      add_custom_command(
+              OUTPUT ${GEN_HEADER}
+              COMMAND "${FLATBUFFERS_FLATC_EXECUTABLE}" -c --no-includes --gen-mutable -o "${SRC_FBS_DIR}" "${CMAKE_SOURCE_DIR}/${SRC_FBS}")
+  endfunction()
+
     include_directories(${FLATBUFFERS_INCLUDE_DIR})
     compile_flatbuffers_schema_to_cpp("schema/message_schema.fbs")
     add_custom_target(message_schema_headers DEPENDS schema/message_schema_generated.h)

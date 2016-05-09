@@ -47,8 +47,8 @@ message(STATUS ${SCHEMA_HEADERS})
 add_definitions(-DMSGT_BUILD_SHARED_LIBS)
 
 add_library(msgt SHARED ${MSGT_HEADERS} ${MSGT_COMMON_SOURCES} ${MSGT_COMMON_HEADERS} ${MSGT_SHAREDMEM_SOURCES} ${MSGT_SHAREDMEM_HEADERS})
-add_dependencies(msgt message_schema_headers)
-target_compile_definitions(msgt PUBLIC -DMSGT_EXPORT)
+#add_dependencies(msgt message_schema_headers)
+target_compile_definitions(msgt PUBLIC -DMSGT_EXPORTS)
 target_link_libraries(msgt ${requiredLibs})
 
 add_executable(msgt_manager ${MSGT_MANAGER_SOURCES})

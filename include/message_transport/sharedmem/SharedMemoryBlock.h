@@ -7,11 +7,15 @@
 #include <boost/interprocess/sync/interprocess_mutex.hpp>
 #include <boost/interprocess/sync/interprocess_condition.hpp>
 #include <boost/interprocess/sync/scoped_lock.hpp>
+
+#include "message_transport/message_transport_macros.h"
 #include "message_transport/sharedmem/SharedMemoryBlockDescriptor.h"
-#include "message_transport/sharedmem/SharedMemoryBlock.h"
 #include "message_transport/serialization/serialization.h"
 #include "message_transport/logging.h"
 
+#ifdef _MSC_VER
+#pragma warning( disable : 4251 )
+#endif
 
 namespace sharedmem_transport {
 
@@ -29,7 +33,7 @@ namespace sharedmem_transport {
         bool is_valid() const {return ptr != NULL;}
     };
 
-    class SharedMemoryBlock {
+    class MSGT_API_DECL SharedMemoryBlock {
         protected:
             //Mutex to protect access to the queue
             boost::interprocess::interprocess_mutex      mutex;

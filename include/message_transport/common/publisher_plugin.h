@@ -6,6 +6,8 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/property_tree/ptree.hpp>
 
+#include "message_transport/message_transport_types.h"
+
 namespace message_transport {
 namespace pt = boost::property_tree;
 
