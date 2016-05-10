@@ -45,7 +45,7 @@ SharedMemoryBlock* blockmgr = NULL;
 int main(int argc, char **argv)
 {
     std::string segment_name = MSGTSharedMemoryDefaultBlock;
-    int segment_size = 1000000;
+    int segment_size = 1024*1024*4;
 
     try {
 
@@ -54,8 +54,8 @@ int main(int argc, char **argv)
         po::options_description poDesc("Allowed options", 80);
         poDesc.add_options()
                 ("help", "print this help message")
-                ("size", po::value<int>(&segment_size), "Segment Size")
-                ("name", po::value<std::string>(&segment_name), "Segment Name");
+                ("segment_size", po::value<int>(&segment_size), "Segment Size")
+                ("segment_name", po::value<std::string>(&segment_name), "Segment Name");
 
         // specify default options
         po::positional_options_description inputOptions;

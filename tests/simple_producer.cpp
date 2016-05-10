@@ -9,7 +9,7 @@
 #include <boost/thread.hpp>
 #include <boost/chrono.hpp>
 
-#include "message_transport/logging.h"
+#include "message_transport/init_logging.h"
 #include "message_transport/common/publisher.h"
 #include "message_transport/sharedmem/SharedMemoryBlock.h"
 #include "message_transport/serialization/message_types.h"
@@ -23,7 +23,9 @@ int main(int argc, char **argv)
 {
     std::string segment_name = MSGTSharedMemoryDefaultBlock;
     int segment_size = 1000000;
+    int size_message = 1024;
     int num_messages = 100;
+    bool log_debug = false;
 
     try {
 
@@ -32,8 +34,11 @@ int main(int argc, char **argv)
         po::options_description poDesc("Allowed options", 80);
         poDesc.add_options()
                 ("help", "print this help message")
-                ("size", po::value<int>(&segment_size), "Segment Size")
-                ("name", po::value<std::string>(&segment_name), "Segment Name");
+                ("debug", po::value<bool>(&log_debug), "Enable debug messages")
+                ("size", po::value<int>(&size_message), "Size of Message to Produce")
+                ("count", po::value<int>(&num_messages), "Number of Messages to Produce")
+                ("segment_size", po::value<int>(&segment_size), "Segment Size")
+                ("segment_name", po::value<std::string>(&segment_name), "Segment Name");
 
         // specify default options
         po::positional_options_description inputOptions;
@@ -58,6 +63,12 @@ int main(int argc, char **argv)
         return 1;
     }
 
+    logging::trivial::severity_level severity = logging::trivial::info;
+    if (log_debug) {
+        severity = logging::trivial::debug;
+    }
+    mt::initLogging(severity);
+
     LOG_INFO("Create Subscriber config");
     pt::ptree e1, e2;
     boost::shared_ptr<pt::ptree> config(new pt::ptree);
@@ -70,12 +81,15 @@ int main(int argc, char **argv)
     LOG_INFO("Create Publisher - segment: " << segment_name);
     mt::Publisher pub(config);
     LOG_INFO("Initialize to topic: test_message");
-    pub.do_initialise<mts::TestMessage>("test_message");
+    pub.do_initialise<mts::RawMessage>("test_message");
 
     int send_count = 0;
     while (send_count < num_messages) {
-        mts::TestMessage msg;
-        msg.value = send_count;
+        mts::RawMessage msg;
+        msg.allocate(size_message);
+        for (int i=0; i<size_message; i++) {
+            msg.getDataPtr()[i] = 1;
+        }
         LOG_INFO("Sending message: " << send_count);
         pub.publish(msg);
         boost::this_thread::sleep_for( boost::chrono::milliseconds(500) );

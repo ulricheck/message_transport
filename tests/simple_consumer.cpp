@@ -8,7 +8,7 @@
 #include <boost/program_options.hpp>
 #include <boost/property_tree/ptree.hpp>
 
-#include "message_transport/logging.h"
+#include "message_transport/init_logging.h"
 #include "message_transport/common/subscriber.h"
 #include "message_transport/sharedmem/SharedMemoryBlock.h"
 #include "message_transport/serialization/message_types.h"
@@ -21,8 +21,8 @@ namespace mts = message_transport::serialization;
 
 int receive_count = 0;
 
-void test_callback(const mts::TestMessageConstPtr& m) {
-    std::cout << "received: " << m->value << std::endl;
+void test_callback(const mts::RawMessageConstPtr& m) {
+    std::cout << "received message: " << receive_count << " bytes: " << m->getLength() << std::endl;
     receive_count++;
 }
 
@@ -32,6 +32,7 @@ int main(int argc, char **argv)
 {
     std::string segment_name = MSGTSharedMemoryDefaultBlock;
     int segment_size = 1000000;
+    bool log_debug = false;
 
     try {
 
@@ -40,8 +41,9 @@ int main(int argc, char **argv)
         po::options_description poDesc("Allowed options", 80);
         poDesc.add_options()
                 ("help", "print this help message")
-                ("size", po::value<int>(&segment_size), "Segment Size")
-                ("name", po::value<std::string>(&segment_name), "Segment Name");
+                ("debug", po::value<bool>(&log_debug), "Enable debug messages")
+                ("segment_size", po::value<int>(&segment_size), "Segment Size")
+                ("segment_name", po::value<std::string>(&segment_name), "Segment Name");
 
         // specify default options
         po::positional_options_description inputOptions;
@@ -66,6 +68,12 @@ int main(int argc, char **argv)
         return 1;
     }
 
+    logging::trivial::severity_level severity = logging::trivial::info;
+    if (log_debug) {
+        severity = logging::trivial::debug;
+    }
+    mt::initLogging(severity);
+
     LOG_INFO("Create Subscriber config");
     pt::ptree e1, e2;
     boost::shared_ptr<pt::ptree> config(new pt::ptree);
@@ -78,9 +86,9 @@ int main(int argc, char **argv)
     LOG_INFO("Create Subscriber - segment: " << segment_name);
     mt::Subscriber sub(config);
     LOG_INFO("Subscribe to topic: test_message");
-    boost::function< void ( const mts::TestMessageConstPtr& ) > cb;
+    boost::function< void ( const mts::RawMessageConstPtr& ) > cb;
     cb = &test_callback;
-    sub.do_subscribe<mts::TestMessage>("test_message", "sharedmem", 1, cb);
+    sub.do_subscribe<mts::RawMessage>("test_message", "sharedmem", 1, cb);
 
     std::cout << "press enter to exit" << std::endl;
     std::cin.ignore();

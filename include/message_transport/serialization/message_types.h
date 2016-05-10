@@ -7,6 +7,8 @@
 
 
 #include <string>
+#include <memory>
+
 #include <boost/shared_ptr.hpp>
 #include "message_transport/serialization/serialization.h"
 
@@ -16,48 +18,97 @@ namespace serialization {
 // for now only testing ..
 
 template <class ContainerAllocator>
-class TestMessage_ {
+class RawMessage_ {
 public:
 
-    typedef TestMessage_<ContainerAllocator> Type;
-    typedef boost::shared_ptr< TestMessage_<ContainerAllocator> > Ptr;
-    typedef boost::shared_ptr< TestMessage_<ContainerAllocator>  const> ConstPtr;
+    typedef RawMessage_<ContainerAllocator> Type;
+    typedef boost::shared_ptr< RawMessage_<ContainerAllocator> > Ptr;
+    typedef boost::shared_ptr< RawMessage_<ContainerAllocator>  const> ConstPtr;
 
 
-    TestMessage_() : value(0) {}
-    TestMessage_(const ContainerAllocator& _alloc) : value(0) {}
+    RawMessage_() : value(nullptr), allocated_bytes(0) {}
+    RawMessage_(const ContainerAllocator& _alloc) : value(nullptr), allocated_bytes(0) {}
 
+    bool allocate(uint32_t size) {
+        if (size == allocated_bytes) {
+            return true;
+        }
 
-    int value;
+        ContainerAllocator alloc;
+        if (allocated_bytes > 0) {
+            alloc.deallocate(value, allocated_bytes);
+            allocated_bytes = 0;
+        }
+        if (size > 0) {
+            try {
+                value = alloc.allocate(size);
+                allocated_bytes = size;
+            } catch (std::bad_alloc &) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    uint8_t* getDataPtr() {
+        if (allocated_bytes == 0) {
+            return nullptr;
+        }
+        return value;
+    }
+
+    uint8_t* getDataConstPtr() const {
+        if (allocated_bytes == 0) {
+            return nullptr;
+        }
+        return value;
+    }
+
+    uint32_t getLength() const {
+        return allocated_bytes;
+    }
+
+protected:
+    uint8_t* value;
+    uint32_t allocated_bytes;
 };
-typedef TestMessage_<std::allocator<void> > TestMessage;
+typedef RawMessage_<std::allocator<uint8_t> > RawMessage;
 
-typedef boost::shared_ptr< TestMessage> TestMessagePtr;
-typedef boost::shared_ptr< TestMessage const> TestMessageConstPtr;
+typedef boost::shared_ptr< RawMessage> RawMessagePtr;
+typedef boost::shared_ptr< RawMessage const> RawMessageConstPtr;
 
 
 
 /**
- * \brief Serializer specialized for TestMessage
+ * \brief Serializer specialized for RawMessage
+ * @todo is it possible to avoid copying here ?
  */
 template<>
-struct Serializer<TestMessage>
+struct Serializer<RawMessage>
 {
   template<typename Stream>
-  inline static void write(Stream& stream, const TestMessage& v)
+  inline static void write(Stream& stream, const RawMessage& v)
   {
-      stream.next(v.value);
+      uint32_t data_size = v.getLength();
+      if (data_size > 0) {
+          memcpy(stream.advance(data_size), v.getDataConstPtr(), data_size);
+      }
   }
 
   template<typename Stream>
-  inline static void read(Stream& stream, TestMessage& v)
+  inline static void read(Stream& stream, RawMessage& v)
   {
-      stream.next(v.value);
+      uint32_t data_size = stream.getLength();
+      if (v.allocate(data_size)) {
+          if (data_size > 0) {
+              memcpy(v.getDataPtr(), stream.advance(data_size), data_size);
+          }
+      }
   }
 
-  inline static uint32_t serializedLength(const TestMessage&)
+  inline static uint32_t serializedLength(const RawMessage& v)
   {
-      return 4;
+      return v.getLength();
   }
 };
 

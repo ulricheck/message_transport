@@ -18,6 +18,4 @@
 
 #define LOG_ERROR(message) \
     BOOST_LOG_TRIVIAL(error) << message
-
-
 #endif //MESSAGE_TRANSPORT_LOGGING_H
