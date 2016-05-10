@@ -9,6 +9,8 @@
 #include "message_transport/common/subscriber_plugin.h"
 #include "message_transport/sharedmem/SharedMemoryBlock.h"
 #include "message_transport/logging.h"
+#include "message_transport/tracing.h"
+#include "message_transport/message_transport_traits.h"
 
 
 namespace sharedmem_transport {
@@ -52,6 +54,7 @@ namespace pt = boost::property_tree;
                     LOG_DEBUG("Waiting for data");
                     boost::shared_ptr<Base> message_ptr(new Base);
                     if (blockmgr_->wait_data(*segment_, shm_handle_, *message_ptr) && user_cb_) {
+                        MSGT_TRACE_MESSAGE_CALLBACK(message_transport::message_traits::getMessageID(*message_ptr), this->getTopic().c_str())
                         (*user_cb_)(message_ptr);
                     }
                 }

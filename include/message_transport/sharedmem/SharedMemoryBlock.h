@@ -12,6 +12,8 @@
 #include "message_transport/sharedmem/SharedMemoryBlockDescriptor.h"
 #include "message_transport/serialization/serialization.h"
 #include "message_transport/logging.h"
+#include "message_transport/tracing.h"
+#include "message_transport/message_transport_traits.h"
 
 #ifdef _MSC_VER
 #pragma warning( disable : 4251 )
@@ -68,6 +70,7 @@ namespace sharedmem_transport {
                     if (!descriptors[src.handle].wait_data_and_register_client(lock))  {
                         return false;
                     }
+                    MSGT_TRACE_MESSAGE_RECEIVED(src.handle)
                     /*
                     if (!ros::ok()) {
                         lock.unlock();
@@ -79,6 +82,7 @@ namespace sharedmem_transport {
                     LOG_DEBUG("Unlocking " << src.handle);
                 }
                 deserialize<Base>(segment,src,msg);
+                MSGT_TRACE_MESSAGE_DESERIALIZED(message_transport::message_traits::getMessageID(msg), src.handle)
 
                 unregister_global_client();
                 LOG_DEBUG("Unregistering " << src.handle);
@@ -107,6 +111,7 @@ namespace sharedmem_transport {
 
                 message_transport::serialization::OStream out(dest.ptr,descriptors[dest.handle].size_);
                 message_transport::serialization::serialize(out, msg);
+                MSGT_TRACE_MESSAGE_SERIALIZED(message_transport::message_traits::getMessageID(msg), dest.handle)
 
                 unregister_global_client();
                 LOG_DEBUG("serialize: global clients released");

@@ -44,6 +44,17 @@ template<typename M> struct IsSimple : public FalseType {};
  * \brief A fixed-size datatype is one whose size is constant, i.e. it has no variable-length arrays or strings
  */
 template<typename M> struct IsFixedSize : public FalseType {};
+/**
+ * \brief HasHeader informs whether or not there is a header that gets serialized as the first thing in the message
+ */
+template<typename M> struct HasHeader : public FalseType {};
+
+/**
+ * \brief Am I message or not
+ */
+template<typename M> struct IsMessage : public FalseType {};
+
+
 
 /**
  * \brief returns IsSimple<M>::value;
@@ -63,6 +74,7 @@ inline bool isFixedSize()
     return IsFixedSize<typename boost::remove_reference<typename boost::remove_const<M>::type>::type>::value;
 }
 
+
 #define MSGT_CREATE_SIMPLE_TRAITS(Type) \
     template<> struct IsSimple<Type> : public TrueType {}; \
     template<> struct IsFixedSize<Type> : public TrueType {};
@@ -80,6 +92,29 @@ MSGT_CREATE_SIMPLE_TRAITS(double);
 
 // because std::vector<bool> is not a true vector, bool is not a simple type
 template<> struct IsFixedSize<bool> : public TrueType {};
+
+
+/**
+ * \brief MessageID
+ */
+template<typename M> struct MessageID {
+  static const unsigned long long getMessageID(const M& message) { return 0; }
+};
+
+/**
+ * \brief returns hasMessageID<M>::value;
+ */
+template<typename M>
+inline const unsigned long long getMessageID(const typename M::ConstPtr& message)
+{
+    return MessageID<typename boost::remove_reference<typename boost::remove_const<M>::type>::type>::getMessageID(message);
+}
+
+template<typename M>
+inline const unsigned long long getMessageID(const M& message)
+{
+    return MessageID<typename boost::remove_const<M>::type>::getMessageID(message);
+}
 
 
 }

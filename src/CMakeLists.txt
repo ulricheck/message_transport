@@ -1,11 +1,12 @@
 
 set (MSGT_HEADERS
         ${CMAKE_SOURCE_DIR}/include/message_transport/message_transport_macros.h
-        ${CMAKE_SOURCE_DIR}/include/message_transport/message_traits.h
+        ${CMAKE_SOURCE_DIR}/include/message_transport/message_transport_traits.h
         ${CMAKE_SOURCE_DIR}/include/message_transport/message_transport_types.h
         ${CMAKE_SOURCE_DIR}/include/message_transport/exceptions.h
         ${CMAKE_SOURCE_DIR}/include/message_transport/logging.h
         ${CMAKE_SOURCE_DIR}/include/message_transport/init_logging.h
+        ${CMAKE_SOURCE_DIR}/include/message_transport/tracing.h
         )
 
 set(MSGT_COMMON_HEADERS
@@ -18,6 +19,7 @@ set(MSGT_COMMON_HEADERS
         ${CMAKE_SOURCE_DIR}/include/message_transport/common/subscriber_plugin.h
         ${CMAKE_SOURCE_DIR}/include/message_transport/serialization/serialization.h
         ${CMAKE_SOURCE_DIR}/include/message_transport/serialization/message_types.h
+        ${tracing_src_files}
         )
 
 set(MSGT_COMMON_SOURCES
@@ -44,14 +46,23 @@ set(MSGT_MANAGER_SOURCES
         ${CMAKE_CURRENT_SOURCE_DIR}/sharedmem/sharedmem_manager.cpp
         )
 
-message(STATUS ${SCHEMA_HEADERS})
 
-# maybe add static version later ..
+# main library: msgt
 add_definitions(-DMSGT_BUILD_SHARED_LIBS)
 
 add_library(msgt SHARED ${MSGT_HEADERS} ${MSGT_COMMON_SOURCES} ${MSGT_COMMON_HEADERS} ${MSGT_SHAREDMEM_SOURCES} ${MSGT_SHAREDMEM_HEADERS})
 target_compile_definitions(msgt PUBLIC -DMSGT_EXPORTS)
 target_link_libraries(msgt ${requiredLibs})
 
+# tracing
+IF(MSGT_ENABLE_DTRACE)
+    DTRACE_INSTRUMENT(msgt)
+ENDIF(MSGT_ENABLE_DTRACE)
+
+IF(MSGT_ENABLE_ETW)
+    ETW_INSTRUMENT(msgt)
+ENDIF(MSGT_ENABLE_ETW)
+
+# intermediate tool for shm management: msgt_manager
 add_executable(msgt_manager ${MSGT_MANAGER_SOURCES})
 target_link_libraries(msgt_manager msgt ${requiredLibs})

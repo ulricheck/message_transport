@@ -1,13 +1,15 @@
 #ifndef SHAREDMEM_TRANSPORT_PUBLISHER_H
 #define SHAREDMEM_TRANSPORT_PUBLISHER_H
 
+#include <boost/property_tree/ptree.hpp>
+#include <boost/shared_ptr.hpp>
+
 #include "message_transport/common/publisher_plugin.h"
 #include "message_transport/serialization/serialization.h"
 #include "message_transport/sharedmem/SharedMemoryBlock.h"
 #include "message_transport/logging.h"
-
-#include <boost/property_tree/ptree.hpp>
-#include <boost/shared_ptr.hpp>
+#include "message_transport/message_transport_traits.h"
+#include "message_transport/tracing.h"
 
 namespace sharedmem_transport {
 namespace pt = boost::property_tree;
@@ -76,6 +78,8 @@ namespace pt = boost::property_tree;
 		protected:
 
 			virtual void publish(const Base& message) const {
+				// @todo need timestamped messages
+				MSGT_TRACE_MESSAGE_PUBLISHED(message_transport::message_traits::getMessageID(message), this->getTopic().c_str())
                 LOG_DEBUG("Publishing shm message");
 				if (first_run_) {
 					LOG_INFO("First publish run");

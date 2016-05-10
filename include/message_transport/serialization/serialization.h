@@ -6,7 +6,7 @@
 #define MESSAGE_TRANSPORT_SERIALIZATION_H
 
 #include "message_transport/message_transport_macros.h"
-#include "message_transport/message_traits.h"
+#include "message_transport/message_transport_traits.h"
 #include "message_transport/exceptions.h"
 #include "message_transport/message_transport_types.h"
 
