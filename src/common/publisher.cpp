@@ -1,4 +1,4 @@
-#include "message_transport/common/publisher.h"
+#include "message_transport/common/publisher.inl"
 #include "message_transport/common/publisher_plugin.h"
 #include <boost/ptr_container/ptr_vector.hpp>
 #include <boost/foreach.hpp>

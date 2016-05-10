@@ -10,6 +10,7 @@ set (MSGT_HEADERS
 
 set(MSGT_COMMON_HEADERS
         ${CMAKE_SOURCE_DIR}/include/message_transport/common/publisher.h
+        ${CMAKE_SOURCE_DIR}/include/message_transport/common/publisher.inl
         ${CMAKE_SOURCE_DIR}/include/message_transport/common/publisher_impl.h
         ${CMAKE_SOURCE_DIR}/include/message_transport/common/publisher_plugin.h
         ${CMAKE_SOURCE_DIR}/include/message_transport/common/subscriber.h

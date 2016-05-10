@@ -16,7 +16,7 @@ set(Boost_USE_STATIC_LIBS        ON) # only find static libs
 set(Boost_USE_MULTITHREADED      ON)
 set(Boost_USE_STATIC_RUNTIME     OFF)
 
-find_package(Boost COMPONENTS system date_time log thread program_options REQUIRED)
+find_package(Boost COMPONENTS system chrono date_time log thread program_options REQUIRED)
 if(Boost_FOUND)
    add_definitions("-DBOOST_ALL_NO_LIB")
    include_directories(${Boost_INCLUDE_DIRS})

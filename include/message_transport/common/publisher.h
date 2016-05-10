@@ -5,11 +5,15 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/property_tree/ptree.hpp>
 
-#include "message_transport/common/publisher_impl.h"
 #include "message_transport/message_transport_macros.h"
+#include "message_transport/message_transport_types.h"
 
 namespace message_transport {
 namespace pt = boost::property_tree;
+
+
+	// forward declarations
+	class PublisherImplGen;
 
 	/**
 	 * \brief Manages advertisements of multiple transport options on an Message topic.
@@ -51,29 +55,13 @@ namespace pt = boost::property_tree;
 			 * \brief Publish an image on the topics associated with this Publisher.
 			 */
 			template <class M>
-			void publish(const M& message) const
-			{
-				if (!impl_ || !impl_->isValid()) {
-					//ROS_ASSERT_MSG(false, "Call to publish() on an invalid message_transport::Publisher");
-					return;
-				}
-
-				impl_->publish<M>(message);
-			}
+			void publish(const M& message) const;
 
 			/*!
 			 * \brief Publish an image on the topics associated with this Publisher.
 			 */
 			template <class M>
-			void publish(const typename M::ConstPtr& message) const
-			{
-				if (!impl_ || !impl_->isValid()) {
-					//ROS_ASSERT_MSG(false, "Call to publish() on an invalid message_transport::Publisher");
-					return;
-				}
-
-				impl_->publish<M>(message);
-			}
+			void publish(const typename M::ConstPtr& message) const;
 
 			/*!
 			 * \brief Shutdown the advertisements associated with this Publisher.
@@ -81,32 +69,13 @@ namespace pt = boost::property_tree;
 			void shutdown();
 
 			operator void*() const;
-			bool operator< (const Publisher& rhs) const { return impl_ <  rhs.impl_; }
-			bool operator!=(const Publisher& rhs) const { return impl_ != rhs.impl_; }
-			bool operator==(const Publisher& rhs) const { return impl_ == rhs.impl_; }
+			bool operator< (const Publisher& rhs) const;
+			bool operator!=(const Publisher& rhs) const;
+			bool operator==(const Publisher& rhs) const;
 
 
 			template <class M>
-			void do_initialise(const std::string& base_topic)
-			{
-				assert(impl_ == NULL);
-				PublisherImpl<M>* impl = new PublisherImpl<M>(config_, base_topic);
-				impl_.reset(impl);
-
-				BOOST_FOREACH(const std::string& lookup_name, impl->getDeclaredClasses()) {
-					try {
-						boost::shared_ptr< PublisherPlugin<M> > pub = impl->addInstance(lookup_name);
-                        // maybe initialize an instance ??
-					}
-					catch (const std::runtime_error& e) {
-						//LOG_DEBUG("Failed to load plugin %s, error string: %s", lookup_name.c_str(), e.what());
-					}
-				}
-
-				if (impl->getNumPublishers() == 0) {
-					throw std::runtime_error("No plugins found!");
-				}
-			}
+			void do_initialise(const std::string& base_topic);
 
 		private:
 
