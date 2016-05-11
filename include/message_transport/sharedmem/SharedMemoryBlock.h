@@ -21,7 +21,7 @@
 
 namespace sharedmem_transport {
 
-#define MSGTSharedMemoryDefaultBlock "MessageTransport::SharedMemoryBlock"
+#define MSGTSharedMemoryDefaultBlock "MessageTransport_SharedMemoryBlock"
 #define MSGTSharedMemoryNumBlock 100
 
 
