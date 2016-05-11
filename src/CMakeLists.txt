@@ -3,10 +3,12 @@ set (MSGT_HEADERS
         ${CMAKE_SOURCE_DIR}/include/message_transport/message_transport_macros.h
         ${CMAKE_SOURCE_DIR}/include/message_transport/message_transport_traits.h
         ${CMAKE_SOURCE_DIR}/include/message_transport/message_transport_types.h
+        ${CMAKE_SOURCE_DIR}/include/message_transport/message_transport_util.h
         ${CMAKE_SOURCE_DIR}/include/message_transport/exceptions.h
         ${CMAKE_SOURCE_DIR}/include/message_transport/logging.h
         ${CMAKE_SOURCE_DIR}/include/message_transport/init_logging.h
         ${CMAKE_SOURCE_DIR}/include/message_transport/tracing.h
+        ${CMAKE_SOURCE_DIR}/include/message_transport/platform/clean_windows.h
         )
 
 set(MSGT_COMMON_HEADERS
@@ -27,6 +29,7 @@ set(MSGT_COMMON_SOURCES
         ${CMAKE_CURRENT_SOURCE_DIR}/common/subscriber.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/serialization/serialization.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/serialization/message_types.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/message_transport_util.cpp
         )
 
 set(MSGT_SHAREDMEM_HEADERS

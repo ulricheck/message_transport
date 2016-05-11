@@ -1,45 +1,40 @@
-#!/usr/sbin/dtrace -s
+#!/usr/sbin/dtrace -v -s
 
 #pragma D option quiet
 
 dtrace:::BEGIN
 {
-    printf("#Start Capturing Eventqueue Statistics, CTRL+C to show results\n");
+    printf("#Start Capturing MessageTransport Statistics, CTRL+C to show results\n");
 
 }
 
-ubitrack*:::eventqueue-dispatch-begin
+messagetransport*:::message-published
 {
-    self->start = timestamp;
+    message_transport_publish[arg0, copyinstr(arg1)] = timestamp;
 }
 
-ubitrack*:::eventqueue-dispatch-end
+messagetransport*:::message-callback
 {
-    @times_component[arg0, copyinstr(arg2), copyinstr(arg3)] = sum(timestamp - self->start);
-    @counts_component[arg0, copyinstr(arg2), copyinstr(arg3)] = count();
-    @times_message[arg0, arg1] = sum(timestamp - self->start);
-    @counts_message[arg0, arg1] = count();
+    @times_topic[copyinstr(arg1)] = sum(timestamp - message_transport_publish[arg0, copyinstr(arg1)]);
+    @counts_topic[copyinstr(arg1)] = count();
+    @avgtime_message[copyinstr(arg1)] = avg(timestamp - message_transport_publish[arg0, copyinstr(arg1)]);
 }
 
 
 END
 {
-        printf("#Time spent for pushing messages into component ports (microseconds)\n");
-        printf(">times_component<");
-        normalize(@times_component,1000);
-        printa(@times_component);
+        printf("#Time spent for tranporting message per topic (microseconds)\n");
+        printf(">times_topic<");
+        normalize(@times_topic,1000);
+        printa(@times_topic);
 
-        printf("#Number of messages processed by component ports\n");
-        printf(">counts_component<");
-        printa(@counts_component);
+        printf("#Number of messages processed per topic\n");
+        printf(">counts_topic<");
+        printa(@counts_topic);
 
-        printf("#Time spent this message priority by component ports (microseconds)\n");
-        printf(">times_message<");
-        normalize(@times_message,1000);
-        printa(@times_message);
-
-        printf("#Number of priorities processed by component ports\n");
-        printf(">counts_message<");
-        printa(@counts_message);
+        printf("#Time spent on delivering to topic (microseconds)\n");
+        printf(">avgtime_message<");
+        normalize(@avgtime_message,1000);
+        printa(@avgtime_message);
 
 }

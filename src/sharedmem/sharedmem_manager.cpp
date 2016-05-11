@@ -45,7 +45,7 @@ SharedMemoryBlock* blockmgr = NULL;
 int main(int argc, char **argv)
 {
     std::string segment_name = MSGTSharedMemoryDefaultBlock;
-    int segment_size = 1024*1024*4;
+    int segment_size = 1024*1024*8;
 
     try {
 
@@ -113,6 +113,7 @@ int main(int argc, char **argv)
     LOG_INFO("Exiting sharedmem_manager, block " << blockmgr);
     if (blockmgr) {
         LOG_INFO("Clearing all shared memory blocks");
+        // @todo hangs if client is killed while lock is acquired
         blockmgr->resetAllBlocks(*segment);
         blockmgr = NULL;
     }

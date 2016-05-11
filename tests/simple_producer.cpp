@@ -10,6 +10,7 @@
 #include <boost/chrono.hpp>
 
 #include "message_transport/init_logging.h"
+#include "message_transport/message_transport_util.h"
 #include "message_transport/common/publisher.h"
 #include "message_transport/sharedmem/SharedMemoryBlock.h"
 #include "message_transport/serialization/message_types.h"
@@ -23,8 +24,8 @@ int main(int argc, char **argv)
 {
     std::string segment_name = MSGTSharedMemoryDefaultBlock;
     int segment_size = 1000000;
-    int size_message = 1024;
-    int num_messages = 100;
+    int size_message = 1024*768*3;// * 2 + 128;
+    int num_messages = 10000;
     bool log_debug = false;
 
     try {
@@ -59,7 +60,7 @@ int main(int argc, char **argv)
     }
     catch (std::exception& e) {
         std::cerr << "Error parsing command line parameters : " << e.what() << std::endl;
-        std::cerr << "Try msgt_manager --help for help" << std::endl;
+        std::cerr << "Try simple_producer --help for help" << std::endl;
         return 1;
     }
 
@@ -84,15 +85,19 @@ int main(int argc, char **argv)
     pub.do_initialise<mts::RawMessage>("test_message");
 
     int send_count = 0;
+
+    LOG_INFO("Initialize message size: " << size_message);
+    mts::RawMessage msg;
+    msg.allocate(size_message);
+    for (int i=0; i<size_message; i++) {
+        msg.getDataPtr()[i] = 1;
+    }
+
     while (send_count < num_messages) {
-        mts::RawMessage msg;
-        msg.allocate(size_message);
-        for (int i=0; i<size_message; i++) {
-            msg.getDataPtr()[i] = 1;
-        }
         LOG_INFO("Sending message: " << send_count);
+        msg.timestamp = mt::now();
         pub.publish(msg);
-        boost::this_thread::sleep_for( boost::chrono::milliseconds(500) );
+        boost::this_thread::sleep_for( boost::chrono::milliseconds(33) );
         send_count++;
     }
 

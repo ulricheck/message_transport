@@ -9,6 +9,7 @@
 #include <boost/property_tree/ptree.hpp>
 
 #include "message_transport/init_logging.h"
+#include "message_transport/message_transport_util.h"
 #include "message_transport/common/subscriber.h"
 #include "message_transport/sharedmem/SharedMemoryBlock.h"
 #include "message_transport/serialization/message_types.h"
@@ -22,7 +23,7 @@ namespace mts = message_transport::serialization;
 int receive_count = 0;
 
 void test_callback(const mts::RawMessageConstPtr& m) {
-    std::cout << "received message: " << receive_count << " bytes: " << m->getLength() << std::endl;
+//    std::cout << "received message: " << receive_count << " bytes: " << m->getDataLength() << std::endl;
     receive_count++;
 }
 
@@ -57,7 +58,7 @@ int main(int argc, char **argv)
 
         // print help message if nothing specified
         if (poOptions.count("help")) {
-            std::cout << "Syntax: msgt_manager [options] " << std::endl << std::endl;
+            std::cout << "Syntax: simple_consumer [options] " << std::endl << std::endl;
             std::cout << poDesc << std::endl;
             return 0;
         }

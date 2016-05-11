@@ -3,13 +3,13 @@
  * author Ulrich Eck <ueck@net-labs.de>
  */
 
-provider message_transport {
+provider messagetransport {
 
     /* probes for tracing message_transport */
-    probe message_published(unsigned long long int msgid, char *topic);
-    probe message_serialized(unsigned long long int msgid, int port);
-    probe message_received(int port);
-    probe message_deserialized(unsigned long long int msgid, int port);
-    probe message_callback(unsigned long long int msgid, char *topic);
+    probe message__published(unsigned long long int msgid, char *topic);
+    probe message__serialized(unsigned long long int msgid, int port);
+    probe message__received(int port);
+    probe message__deserialized(unsigned long long int msgid, int port);
+    probe message__callback(unsigned long long int msgid, char *topic);
 };
 
