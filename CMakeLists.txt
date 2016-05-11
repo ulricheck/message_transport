@@ -56,8 +56,9 @@ IF(MSGT_ENABLE_ETW)
     add_definitions("-DHAVE_ETW")
     add_definitions("-DENABLE_MSGT_TRACING")
     include_directories(${CMAKE_BINARY_DIR})
-    set(tracing_hdr_files ${tracing_hdr_files} "${CMAKE_BINARY_DIR}/tracing/probes_message_transport_etw.h")
-    set(tracing_src_files ${tracing_src_files} "${CMAKE_BINARY_DIR}/tracing/probes_message_transport_etw.rc")
+    set(tracing_hdr_files ${tracing_hdr_files} "${CMAKE_BINARY_DIR}/tracing/etw/message_transport_etw.h")
+    set(tracing_src_files ${tracing_src_files} "${CMAKE_BINARY_DIR}/tracing/etw/message_transport_etw.rc")
+    MESSAGE(STATUS "${tracing_src_files}")
 ENDIF(MSGT_ENABLE_ETW)
 
 

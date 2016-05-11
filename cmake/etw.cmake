@@ -39,38 +39,22 @@ ENDMACRO()
 
 CHECK_ETW()
 
-# Produce a header file  with
-# ETW macros
-MACRO (ETW_HEADER provider header_name)
- IF(ENABLE_ETW)
- ADD_CUSTOM_COMMAND(
-   OUTPUT  ${header_name}.h ${header_name}.rc ${header_name}Temp.bin
-   COMMAND ${CMAKE_MC_COMPILER} -um ${provider} -z ${header_name}
-   WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/utDataflow
-   COMMENT "Exectuing: mc.exe -um ${provider} -z ${header_name}"
-   DEPENDS ${provider}
- )
- ENDIF()
-ENDMACRO()
-
-
 # Create provider headers
 IF(ENABLE_ETW)
-  CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/doc/etw/ubitrack_etw_providers.man.base
-    ${CMAKE_BINARY_DIR}/utDataflow/ubitrack_etw_providers.man COPYONLY)
-  ETW_HEADER(
-   ${CMAKE_BINARY_DIR}/utDataflow/ubitrack_etw_providers.man
-   probes_ubitrack_etw
+  CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/tracing/etw/message_transport_etw_providers.man.base
+    ${CMAKE_BINARY_DIR}/tracing/etw/message_transport_etw_providers.man COPYONLY)
+
+  # generate headers during cmake run for now .. otherwise cmake generate complains about the missing rc file
+  execute_process(
+  COMMAND ${CMAKE_MC_COMPILER} -um ${CMAKE_BINARY_DIR}/tracing/etw/message_transport_etw_providers.man -z message_transport_etw
+  WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/tracing/etw
   )
-  MESSAGE(WARN "Please execute these commands manually for now:")
-  MESSAGE(STATUS "ETW Generate Headers command: cd  ${CMAKE_BINARY_DIR}/utDataflow")
-  MESSAGE(STATUS "ETW Generate Headers command: mc.exe -um ${CMAKE_BINARY_DIR}/utDataflow/ubitrack_etw_providers.man -z probes_ubitrack_etw")
   ADD_CUSTOM_TARGET(gen_etw_header
   DEPENDS  
-  ${CMAKE_BINARY_DIR}/utDataflow/ubitrack_etw_providers.man
-  ${CMAKE_BINARY_DIR}/utDataflow/probes_ubitrack_etw.h
-  ${CMAKE_BINARY_DIR}/utDataflow/probes_ubitrack_etw.rc
-  ${CMAKE_BINARY_DIR}/utDataflow/probes_ubitrack_etwTemp.bin
+  ${CMAKE_BINARY_DIR}/tracing/etw/message_transport_etw_providers.man
+  ${CMAKE_BINARY_DIR}/tracing/etw/message_transport_etw.h
+  ${CMAKE_BINARY_DIR}/tracing/etw/message_transport_etw.rc
+  ${CMAKE_BINARY_DIR}/tracing/etw/message_transport_etwTemp.bin
   ) 
 ENDIF()
 

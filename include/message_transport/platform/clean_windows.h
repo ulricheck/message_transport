@@ -20,17 +20,17 @@
 //#define MSGT_UNDEF_WIN32_LEAN_AND_MEAN
 //#endif
 //
-//#ifndef NOMINMAX
-//#define NOMINMAX
-//#define MSGT_UNDEF_NOMINMNAX
-//#endif
+#ifndef NOMINMAX
+#define NOMINMAX
+#define MSGT_UNDEF_NOMINMNAX
+#endif
 
 #include <Windows.h>
 
-//#ifdef MSGT_UNDEF_NOMINMNAX
-//#undef NOMINMAX
-//#endif
-//
+#ifdef MSGT_UNDEF_NOMINMNAX
+#undef NOMINMAX
+#endif
+
 //#ifdef MSGT_UNDEF_WIN32_LEAN_AND_MEAN
 //#undef WIN32_LEAN_AND_MEAN
 //#endif

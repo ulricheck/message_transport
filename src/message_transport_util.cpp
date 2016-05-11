@@ -33,6 +33,7 @@
 #include <cmath>
 #include <algorithm>
 
+#include "message_transport/logging.h"
 
 namespace message_transport {
 
@@ -188,7 +189,7 @@ Timestamp now()
     // and synchronize it to the real time clock
 
     // read HPC
-    long long hiPerf = Util::getHighPerformanceCounter();
+    long long hiPerf = getHighPerformanceCounter();
 
     // read RTC
     struct _timeb wintime;
@@ -207,12 +208,12 @@ Timestamp now()
     if ( bUseHpc )
     {
         // check if HPC is any good (has constant frequency)
-        double hpcFreq = Util::getHighPerformanceFrequency();
+        double hpcFreq = getHighPerformanceFrequency();
         if ( synchronizer.getEventCount() > 0 )
             if ( hpcFreq != lastHpcFreq )
             {
                 bUseHpc = false;
-                LOG4CPP_WARN( logger, "Your CPU frequency is not constant (power save mode?). Timestamps will be unprecise." );
+                LOG_WARN("Your CPU frequency is not constant (power save mode?). Timestamps will be unprecise." );
                 return rtc;
             }
             else
