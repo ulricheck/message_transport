@@ -4,6 +4,9 @@
 #include "message_transport/sharedmem/SharedMemoryBlock.h"
 #include "message_transport/logging.h"
 
+#include "message_transport/sharedmem/release_pool.h"
+
+
 using namespace boost::interprocess;
 using namespace sharedmem_transport;
 

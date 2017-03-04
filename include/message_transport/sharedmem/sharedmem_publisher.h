@@ -79,7 +79,7 @@ namespace pt = boost::property_tree;
 
 			virtual void publish(const Base& message) const {
 				// @todo need timestamped messages
-				MSGT_TRACE_MESSAGE_PUBLISHED(message_transport::message_traits::getMessageID(message), this->getTopic().c_str())
+				MSGT_TRACE_MESSAGE_PUBLISHED(message_transport::message_traits::getMessageID(message), this->getTopic().c_str()        )
                 LOG_DEBUG("Publishing shm message");
 				if (first_run_) {
 					LOG_INFO("First publish run");

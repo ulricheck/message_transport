@@ -21,6 +21,7 @@ set(MSGT_COMMON_HEADERS
         ${CMAKE_SOURCE_DIR}/include/message_transport/common/subscriber_plugin.h
         ${CMAKE_SOURCE_DIR}/include/message_transport/serialization/serialization.h
         ${CMAKE_SOURCE_DIR}/include/message_transport/serialization/message_types.h
+        ${CMAKE_SOURCE_DIR}/include/message_transport/common/timer.h
         )
 
 set(MSGT_COMMON_SOURCES
@@ -33,6 +34,7 @@ set(MSGT_COMMON_SOURCES
         )
 
 set(MSGT_SHAREDMEM_HEADERS
+        ${CMAKE_SOURCE_DIR}/include/message_transport/sharedmem/release_pool.h
         ${CMAKE_SOURCE_DIR}/include/message_transport/sharedmem/sharedmem_publisher.h
         ${CMAKE_SOURCE_DIR}/include/message_transport/sharedmem/sharedmem_subscriber.h
         ${CMAKE_SOURCE_DIR}/include/message_transport/sharedmem/SharedMemoryBlock.h
